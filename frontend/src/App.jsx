@@ -1,0 +1,322 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import Heatmap from './components/Heatmap';
+
+function App() {
+  const [workouts, setWorkouts] = useState([]);
+  
+  // Helper function to always get today's date in local timezone
+  const getTodaysDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Weight conversion helpers
+  const kgToLbs = (kg) => Math.round(kg * 2.20462);
+  const lbsToKg = (lbs) => Math.round(lbs / 2.20462);
+  const formatWeight = (kg) => useImperial ? `${kgToLbs(kg)}lbs` : `${kg}kg`;
+  
+  // Generate weight options
+  const getWeightOptions = () => {
+    const kgWeights = [8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48];
+    if (useImperial) {
+      return kgWeights.map(kg => ({
+        value: kg,
+        label: `${kgToLbs(kg)}lbs`
+      }));
+    }
+    return kgWeights.map(kg => ({
+      value: kg,
+      label: `${kg}kg`
+    }));
+  };
+  
+  const [formData, setFormData] = useState({
+    date: '', // Start empty, will be set in useEffect
+    kettlebell_swings: '',
+    turkish_get_ups: '',
+    swing_weight_kg: '16',
+    getup_weight_kg: '16',
+    swing_style: '2-handed'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [useImperial, setUseImperial] = useState(false); // kg vs lbs toggle
+
+  // Fetch workouts on component mount
+  useEffect(() => {
+    fetchWorkouts();
+    // Also ensure we have today's date on mount
+    setFormData(prev => ({ ...prev, date: getTodaysDate() }));
+  }, []);
+
+  const fetchWorkouts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/workouts/');
+      setWorkouts(response.data);
+    } catch (error) {
+      console.error('Error fetching workouts:', error);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    
+    try {
+      const workoutData = {
+        date: formData.date,
+        kettlebell_swings: parseInt(formData.kettlebell_swings) || 0,
+        turkish_get_ups: parseInt(formData.turkish_get_ups) || 0,
+        swing_weight_kg: parseFloat(formData.swing_weight_kg) || 16.0,
+        getup_weight_kg: parseFloat(formData.getup_weight_kg) || 16.0,
+        swing_style: formData.swing_style
+      };
+      
+      await axios.post('http://localhost:8000/workouts/', workoutData);
+      
+      // Reset form and refresh workouts
+      setFormData({
+        date: getTodaysDate(),
+        kettlebell_swings: '',
+        turkish_get_ups: '',
+        swing_weight_kg: '16',
+        getup_weight_kg: '16',
+        swing_style: '2-handed'
+      });
+      
+      await fetchWorkouts();
+    } catch (error) {
+      console.error('Error creating workout:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteWorkout = async (workoutId) => {
+    try {
+      await axios.delete(`http://localhost:8000/workouts/${workoutId}`);
+      await fetchWorkouts();
+    } catch (error) {
+      console.error('Error deleting workout:', error);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
+            Simple & Sinister
+          </h1>
+          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
+            Track your kettlebell workouts. Master the fundamentals.
+          </p>
+        </div>
+
+        {/* Workout Form */}
+        <div className="max-w-md mx-auto mb-12">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">Log Workout</h2>
+              
+              {/* Units Toggle */}
+              <div className="flex items-center gap-2">
+                <span className={`text-sm ${!useImperial ? 'text-white' : 'text-purple-300'}`}>kg</span>
+                <button
+                  type="button"
+                  onClick={() => setUseImperial(!useImperial)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    useImperial ? 'bg-purple-600' : 'bg-white/20'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      useImperial ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`text-sm ${useImperial ? 'text-white' : 'text-purple-300'}`}>lbs</span>
+              </div>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-purple-200 mb-2">
+                  Date
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInputChange}
+                    className="flex-1 px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, date: getTodaysDate() }))}
+                    className="px-3 py-3 bg-blue-500/20 border border-blue-400/30 rounded-xl text-blue-200 hover:bg-blue-500/30 transition-colors text-sm"
+                  >
+                    Today
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="kettlebell_swings" className="block text-sm font-medium text-purple-200 mb-2">
+                  Kettlebell Swings
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  <input
+                    type="number"
+                    id="kettlebell_swings"
+                    name="kettlebell_swings"
+                    value={formData.kettlebell_swings}
+                    onChange={handleInputChange}
+                    placeholder="100"
+                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    min="0"
+                  />
+                  <select
+                    name="swing_weight_kg"
+                    value={formData.swing_weight_kg}
+                    onChange={handleInputChange}
+                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
+                  >
+                    {getWeightOptions().map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    name="swing_style"
+                    value={formData.swing_style}
+                    onChange={handleInputChange}
+                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
+                  >
+                    <option value="2-handed">2-handed</option>
+                    <option value="1-handed">1-handed</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="turkish_get_ups" className="block text-sm font-medium text-purple-200 mb-2">
+                  Turkish Get-ups
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="number"
+                    id="turkish_get_ups"
+                    name="turkish_get_ups"
+                    value={formData.turkish_get_ups}
+                    onChange={handleInputChange}
+                    placeholder="10"
+                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    min="0"
+                  />
+                  <select
+                    name="getup_weight_kg"
+                    value={formData.getup_weight_kg}
+                    onChange={handleInputChange}
+                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
+                  >
+                    {getWeightOptions().map(option => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent"
+              >
+                {isLoading ? 'Logging...' : 'Log Workout'}
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* Training Consistency Heatmap */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <Heatmap workouts={workouts} isLoading={isLoading} useImperial={useImperial} />
+        </div>
+
+        {/* Workout List */}
+        {workouts.length > 0 && (
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">Recent Workouts</h2>
+            
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {workouts.slice().reverse().map((workout) => (
+                <div key={workout.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300">
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold text-white">
+                      {new Date(workout.date).toLocaleDateString()}
+                    </h3>
+                    <button
+                      onClick={() => deleteWorkout(workout.id)}
+                      className="text-red-400 hover:text-red-300 transition-colors duration-200"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-purple-200">Swings:</span>
+                      <span className="text-white font-bold text-lg">
+                        {workout.kettlebell_swings} 
+                        <span className="text-sm text-purple-300 ml-1">
+                          @ {formatWeight(workout.swing_weight_kg || 16)}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-purple-200">Get-ups:</span>
+                      <span className="text-white font-bold text-lg">
+                        {workout.turkish_get_ups}
+                        <span className="text-sm text-purple-300 ml-1">
+                          @ {formatWeight(workout.getup_weight_kg || 16)}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {workouts.length === 0 && (
+          <div className="text-center">
+            <p className="text-purple-200 text-lg">No workouts logged yet. Start your journey!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default App;
