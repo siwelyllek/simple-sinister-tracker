@@ -39,7 +39,11 @@ function App() {
     kettlebell_swings: '',
     turkish_get_ups: '',
     swing_weight_kg: '16',
-    getup_weight_kg: '16',
+    // Dual get-up weight system
+    getup_weight_1_kg: '16',
+    getup_reps_1: '',
+    getup_weight_2_kg: '',
+    getup_reps_2: '',
     swing_style: '2-handed'
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -51,6 +55,14 @@ function App() {
     // Also ensure we have today's date on mount
     setFormData(prev => ({ ...prev, date: getTodaysDate() }));
   }, []);
+
+  // Auto-calculate total turkish_get_ups when individual reps change
+  useEffect(() => {
+    const totalReps = (parseInt(formData.getup_reps_1) || 0) + (parseInt(formData.getup_reps_2) || 0);
+    if (totalReps !== (parseInt(formData.turkish_get_ups) || 0)) {
+      setFormData(prev => ({ ...prev, turkish_get_ups: totalReps.toString() }));
+    }
+  }, [formData.getup_reps_1, formData.getup_reps_2]);
 
   const fetchWorkouts = async () => {
     try {
@@ -79,7 +91,11 @@ function App() {
         kettlebell_swings: parseInt(formData.kettlebell_swings) || 0,
         turkish_get_ups: parseInt(formData.turkish_get_ups) || 0,
         swing_weight_kg: parseFloat(formData.swing_weight_kg) || 16.0,
-        getup_weight_kg: parseFloat(formData.getup_weight_kg) || 16.0,
+        // Dual get-up weight system
+        getup_weight_1_kg: parseFloat(formData.getup_weight_1_kg) || 16.0,
+        getup_reps_1: parseInt(formData.getup_reps_1) || 0,
+        getup_weight_2_kg: formData.getup_weight_2_kg ? parseFloat(formData.getup_weight_2_kg) : null,
+        getup_reps_2: parseInt(formData.getup_reps_2) || 0,
         swing_style: formData.swing_style
       };
       
@@ -91,7 +107,11 @@ function App() {
         kettlebell_swings: '',
         turkish_get_ups: '',
         swing_weight_kg: '16',
-        getup_weight_kg: '16',
+        // Dual get-up weight system
+        getup_weight_1_kg: '16',
+        getup_reps_1: '',
+        getup_weight_2_kg: '',
+        getup_reps_2: '',
         swing_style: '2-handed'
       });
       
@@ -216,32 +236,77 @@ function App() {
               </div>
 
               <div>
-                <label htmlFor="turkish_get_ups" className="block text-sm font-medium text-purple-200 mb-2">
+                <label className="block text-sm font-medium text-purple-200 mb-2">
                   Turkish Get-ups
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    type="number"
-                    id="turkish_get_ups"
-                    name="turkish_get_ups"
-                    value={formData.turkish_get_ups}
-                    onChange={handleInputChange}
-                    placeholder="10"
-                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    min="0"
-                  />
-                  <select
-                    name="getup_weight_kg"
-                    value={formData.getup_weight_kg}
-                    onChange={handleInputChange}
-                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
-                  >
-                    {getWeightOptions().map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                
+                {/* Total get-ups display */}
+                <div className="mb-3 p-3 bg-purple-500/20 rounded-lg border border-purple-400/30">
+                  <div className="text-center">
+                    <span className="text-2xl font-bold text-purple-300">{formData.turkish_get_ups || 0}</span>
+                    <span className="text-sm text-purple-200 block">Total Get-ups</span>
+                  </div>
+                </div>
+
+                {/* First weight input */}
+                <div className="mb-3">
+                  <label className="block text-xs font-medium text-purple-300 mb-1">
+                    Weight 1
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      name="getup_reps_1"
+                      value={formData.getup_reps_1}
+                      onChange={handleInputChange}
+                      placeholder="Reps"
+                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                      min="0"
+                    />
+                    <select
+                      name="getup_weight_1_kg"
+                      value={formData.getup_weight_1_kg}
+                      onChange={handleInputChange}
+                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white text-sm"
+                    >
+                      {getWeightOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Second weight input (optional) */}
+                <div>
+                  <label className="block text-xs font-medium text-purple-300 mb-1">
+                    Weight 2 (optional)
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="number"
+                      name="getup_reps_2"
+                      value={formData.getup_reps_2}
+                      onChange={handleInputChange}
+                      placeholder="Reps"
+                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                      min="0"
+                    />
+                    <select
+                      name="getup_weight_2_kg"
+                      value={formData.getup_weight_2_kg}
+                      onChange={handleInputChange}
+                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white text-sm"
+                    >
+                      <option value="">No second weight</option>
+                      {getWeightOptions().map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 

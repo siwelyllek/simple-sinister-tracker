@@ -34,7 +34,10 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
     }, 0);
     
     const totalGetUpVolume = yearWorkouts.reduce((sum, w) => {
-      return sum + (w.turkish_get_ups * (w.getup_weight_kg || 16));
+      // Calculate volume using dual weight system
+      const volume1 = (w.getup_reps_1 || 0) * (w.getup_weight_1_kg || 16);
+      const volume2 = (w.getup_reps_2 || 0) * (w.getup_weight_2_kg || 0);
+      return sum + volume1 + volume2;
     }, 0);
     
     return { totalDays, totalSwings, totalGetUps, totalSwingVolume, totalGetUpVolume };
@@ -58,10 +61,21 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
         const detail = value.details[0];
         const kgToLbs = (kg) => Math.round(kg * 2.20462);
         const swingWeightDisplay = useImperial ? `${kgToLbs(detail.swingWeight)}lbs` : `${detail.swingWeight}kg`;
-        const getUpWeightDisplay = useImperial ? `${kgToLbs(detail.getUpWeight)}lbs` : `${detail.getUpWeight}kg`;
         
         tooltipContent += `${detail.swings} ${detail.swingStyle} swings @ ${swingWeightDisplay}\n`;
-        tooltipContent += `${detail.getUps} get-ups @ ${getUpWeightDisplay}`;
+        
+        // Handle dual get-up weights
+        if (detail.getUpReps2 > 0 && detail.getUpWeight2) {
+          // Multiple weights used
+          const weight1Display = useImperial ? `${kgToLbs(detail.getUpWeight1)}lbs` : `${detail.getUpWeight1}kg`;
+          const weight2Display = useImperial ? `${kgToLbs(detail.getUpWeight2)}lbs` : `${detail.getUpWeight2}kg`;
+          tooltipContent += `${detail.getUpReps1} get-ups @ ${weight1Display}\n`;
+          tooltipContent += `${detail.getUpReps2} get-ups @ ${weight2Display}`;
+        } else {
+          // Single weight used
+          const weight1Display = useImperial ? `${kgToLbs(detail.getUpWeight1)}lbs` : `${detail.getUpWeight1}kg`;
+          tooltipContent += `${detail.getUps} get-ups @ ${weight1Display}`;
+        }
       } else {
         tooltipContent += `${value.workouts} workouts - ${value.swings} total swings, ${value.getUps} total get-ups`;
       }
@@ -109,7 +123,11 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
           swings: workout.kettlebell_swings,
           getUps: workout.turkish_get_ups,
           swingWeight: workout.swing_weight_kg || 16,
-          getUpWeight: workout.getup_weight_kg || 16,
+          // Dual get-up weight system
+          getUpWeight1: workout.getup_weight_1_kg || 16,
+          getUpReps1: workout.getup_reps_1 || 0,
+          getUpWeight2: workout.getup_weight_2_kg,
+          getUpReps2: workout.getup_reps_2 || 0,
           swingStyle: workout.swing_style || "2-handed"
         });
       });
