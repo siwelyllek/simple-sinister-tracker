@@ -10,7 +10,7 @@ services:
     ports:
       - "3122:3000"
     environment:
-      - VITE_API_URL=http://localhost:8225
+      - VITE_API_URL=http://backend:8000
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend

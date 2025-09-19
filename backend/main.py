@@ -49,6 +49,9 @@ app.add_middleware(
         "http://localhost:3000",  # Local development
         "http://127.0.0.1:3000",  # Alternative localhost
         "http://0.0.0.0:3000",    # Docker networking
+        "http://localhost:3122",  # New frontend port
+        "http://127.0.0.1:3122",  # Alternative localhost for new port
+        "http://0.0.0.0:3122",    # Docker networking for new port
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE"],  # Only needed methods
