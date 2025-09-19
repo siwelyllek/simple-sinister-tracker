@@ -4,13 +4,13 @@ services:
     volumes:
       - workoutdata:/app/data
     ports:
-      - "8222:8000"
+      - "8225:8000"
   frontend:
     build: ./frontend
     ports:
       - "3122:3000"
     environment:
-      - VITE_API_URL=http://localhost:8222
+      - VITE_API_URL=http://localhost:8225
       - CHOKIDAR_USEPOLLING=true
     depends_on:
       - backend
