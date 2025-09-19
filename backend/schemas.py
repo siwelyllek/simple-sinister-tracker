@@ -1,18 +1,18 @@
-from pydantic import BaseModel, validator
-from datetime import date
+from pydantic import BaseModel, validator, Field
+from datetime import date as date_type
 from typing import Optional
 
 class WorkoutBase(BaseModel):
-    date: date
-    kettlebell_swings: int = 0
-    turkish_get_ups: int = 0
-    swing_weight_kg: float = 16.0
+    date: date_type = Field(..., description="Workout date")
+    kettlebell_swings: int = Field(0, ge=0, le=10000, description="Number of kettlebell swings")
+    turkish_get_ups: int = Field(0, ge=0, le=100, description="Total Turkish get-ups")
+    swing_weight_kg: float = Field(16.0, gt=0, le=200, description="Swing weight in kilograms")
     # Dual get-up weight system
-    getup_weight_1_kg: float = 16.0
-    getup_reps_1: int = 0
-    getup_weight_2_kg: Optional[float] = None
-    getup_reps_2: int = 0
-    swing_style: str = "2-handed"
+    getup_weight_1_kg: float = Field(16.0, gt=0, le=200, description="Primary get-up weight in kilograms")
+    getup_reps_1: int = Field(0, ge=0, le=100, description="Reps for primary weight")
+    getup_weight_2_kg: Optional[float] = Field(None, gt=0, le=200, description="Secondary get-up weight in kilograms")
+    getup_reps_2: int = Field(0, ge=0, le=100, description="Reps for secondary weight")
+    swing_style: str = Field("2-handed", description="Swing style")
     
     @validator('swing_style')
     def validate_swing_style(cls, v):
@@ -20,17 +20,16 @@ class WorkoutBase(BaseModel):
             raise ValueError('swing_style must be either "1-handed" or "2-handed"')
         return v
     
-    @validator('getup_reps_1', 'getup_reps_2')
-    def validate_getup_reps(cls, v):
-        if v < 0:
-            raise ValueError('Get-up reps cannot be negative')
-        return v
-    
-    @validator('getup_weight_2_kg')
-    def validate_getup_weight_2(cls, v, values):
-        # If second weight is provided, ensure it's positive
-        if v is not None and v <= 0:
-            raise ValueError('Get-up weight must be positive')
+    @validator('date')
+    def validate_date(cls, v):
+        from datetime import date, timedelta
+        # Don't allow dates more than 10 years in the past or future
+        today = date.today()
+        min_date = today - timedelta(days=3650)  # 10 years ago
+        max_date = today + timedelta(days=365)   # 1 year future
+        
+        if v < min_date or v > max_date:
+            raise ValueError('Date must be within reasonable range (10 years past to 1 year future)')
         return v
     
     @validator('turkish_get_ups')
