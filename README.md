@@ -71,12 +71,12 @@ The only requirement is Docker and Docker Compose. No need to install Node.js, P
 
 1. Clone the repository
    ```sh
-   git clone https://github.com/yourusername/SS-workout-tracker.git
+   git clone https://github.com/siwelyllek/workout-tracker.git
    ```
 
 2. Navigate to the project directory
    ```sh
-   cd SS-workout-tracker
+   cd workout-tracker
    ```
 
 3. Start the application with Docker Compose
