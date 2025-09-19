@@ -239,7 +239,7 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="text-xl">�</div>
+                          <div className="text-xl">📊</div>
                           <div>
                             <div className="font-semibold text-green-800">Total Session Volume</div>
                             <div className="text-sm text-green-600">Combined workout load</div>
