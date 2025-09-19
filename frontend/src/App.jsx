@@ -68,7 +68,8 @@ function App() {
 
   const fetchWorkouts = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/workouts/');
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${API_URL}/workouts/`);
       setWorkouts(response.data);
     } catch (error) {
       console.error('Error fetching workouts:', error);
@@ -101,7 +102,8 @@ function App() {
         swing_style: formData.swing_style
       };
       
-      await axios.post('http://localhost:8000/workouts/', workoutData);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      await axios.post(`${API_URL}/workouts/`, workoutData);
       
       // Reset form and refresh workouts
       setFormData({
@@ -127,7 +129,8 @@ function App() {
 
   const deleteWorkout = async (workoutId) => {
     try {
-      await axios.delete(`http://localhost:8000/workouts/${workoutId}`);
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      await axios.delete(`${API_URL}/workouts/${workoutId}`);
       await fetchWorkouts();
     } catch (error) {
       console.error('Error deleting workout:', error);
