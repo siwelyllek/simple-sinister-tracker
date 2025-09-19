@@ -8,6 +8,7 @@ import CustomSelect from './components/CustomSelect';
 const getApiUrl = () => {
   // If VITE_API_URL is set in environment, use it
   if (import.meta.env.VITE_API_URL) {
+    console.log('Using environment VITE_API_URL:', import.meta.env.VITE_API_URL);
     return import.meta.env.VITE_API_URL;
   }
   
@@ -16,7 +17,11 @@ const getApiUrl = () => {
   const hostname = window.location.hostname; // localhost, 192.168.1.175, etc.
   const apiPort = '8225'; // Backend port
   
-  return `${protocol}//${hostname}:${apiPort}`;
+  const apiUrl = `${protocol}//${hostname}:${apiPort}`;
+  console.log('Dynamic API URL constructed:', apiUrl);
+  console.log('Current window location:', window.location.href);
+  
+  return apiUrl;
 };
 
 function App() {
