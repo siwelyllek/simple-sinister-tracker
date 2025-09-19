@@ -81,7 +81,7 @@ The only requirement is Docker and Docker Compose. No need to install Node.js, P
 
 2. Navigate to the project directory
    ```sh
-   cd workout-tracker
+   cd simple-sinister-tracker
    ```
 
 3. Start the application with Docker Compose
@@ -89,12 +89,18 @@ The only requirement is Docker and Docker Compose. No need to install Node.js, P
    docker compose up -d --build
    ```
 
-4. Open your browser and visit `http://localhost:3000`
+4. Open your browser and visit `http://localhost:3122`
 
 That's it! The application will be running with:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:8000
+- Frontend: http://localhost:3122
+- Backend API: http://localhost:8225
 - Database: SQLite (local file)
+
+### Network Access
+
+The application is configured to work from any device on your local network. Simply replace `localhost` with your server's IP address:
+- From other devices: `http://YOUR_SERVER_IP:3122` (e.g., `http://192.168.1.175:3122`)
+- API access: `http://YOUR_SERVER_IP:8225`
 
 ## Usage
 
@@ -145,7 +151,7 @@ workout-tracker/
 
 ## API Documentation
 
-Once running, visit `http://localhost:8000/docs` for interactive API documentation powered by FastAPI's automatic OpenAPI generation.
+Once running, visit `http://localhost:8225/docs` for interactive API documentation powered by FastAPI's automatic OpenAPI generation.
 
 ### Key Endpoints
 
