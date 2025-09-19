@@ -1,9 +1,9 @@
-import { useState } from "react"
+import React, { useState } from "react"
 import axios from "axios"
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:8000"
 
-export default function WorkoutList({ workouts, refresh, isLoading }) {
+export default function WorkoutList({ workouts, refresh, isLoading, useImperial = false }) {
   const [deletingId, setDeletingId] = useState(null)
 
   const handleDelete = async (id) => {
@@ -29,6 +29,35 @@ export default function WorkoutList({ workouts, refresh, isLoading }) {
     })
   }
 
+  const formatWeight = (kg) => {
+    if (useImperial) {
+      return `${Math.round(kg * 2.20462)}lbs`
+    }
+    return `${kg}kg`
+  }
+
+  const calculateVolume = (workout) => {
+    const swingVolume = workout.kettlebell_swings * (workout.swing_weight_kg || 16)
+    
+    // Calculate get-up volume using dual weight system
+    const getUpVolume1 = (workout.getup_reps_1 || 0) * (workout.getup_weight_1_kg || 16)
+    const getUpVolume2 = (workout.getup_reps_2 || 0) * (workout.getup_weight_2_kg || 0)
+    const totalGetUpVolume = getUpVolume1 + getUpVolume2
+    
+    return {
+      swing: swingVolume,
+      getUp: totalGetUpVolume,
+      total: swingVolume + totalGetUpVolume
+    }
+  }
+
+  const formatVolume = (volumeKg) => {
+    if (useImperial) {
+      return Math.round(volumeKg * 2.20462).toLocaleString()
+    }
+    return volumeKg.toLocaleString()
+  }
+
   const getWorkoutRating = (swings, getUps) => {
     const standardSwings = 100
     const standardGetUps = 10
@@ -37,11 +66,29 @@ export default function WorkoutList({ workouts, refresh, isLoading }) {
     const getUpPercent = (getUps / standardGetUps) * 100
     const average = (swingPercent + getUpPercent) / 2
     
-    if (average >= 100) return { emoji: "🔥", text: "Perfect!", color: "text-red-500" }
-    if (average >= 80) return { emoji: "💪", text: "Strong", color: "text-orange-500" }
-    if (average >= 60) return { emoji: "👍", text: "Good", color: "text-yellow-500" }
-    if (average >= 40) return { emoji: "🎯", text: "Progress", color: "text-blue-500" }
-    return { emoji: "🌱", text: "Start", color: "text-green-500" }
+    if (average >= 100) return { emoji: "🔥", text: "Perfect!", color: "text-red-500", bgColor: "bg-red-50", borderColor: "border-red-200" }
+    if (average >= 80) return { emoji: "💪", text: "Strong", color: "text-orange-500", bgColor: "bg-orange-50", borderColor: "border-orange-200" }
+    if (average >= 60) return { emoji: "👍", text: "Good", color: "text-yellow-500", bgColor: "bg-yellow-50", borderColor: "border-yellow-200" }
+    if (average >= 40) return { emoji: "🎯", text: "Progress", color: "text-blue-500", bgColor: "bg-blue-50", borderColor: "border-blue-200" }
+    return { emoji: "🌱", text: "Start", color: "text-green-500", bgColor: "bg-green-50", borderColor: "border-green-200" }
+  }
+
+  const getGetUpDisplay = (workout) => {
+    const hasSecondWeight = workout.getup_reps_2 > 0 && workout.getup_weight_2_kg
+    
+    if (hasSecondWeight) {
+      return {
+        primary: `${workout.getup_reps_1} @ ${formatWeight(workout.getup_weight_1_kg)}`,
+        secondary: `${workout.getup_reps_2} @ ${formatWeight(workout.getup_weight_2_kg)}`,
+        isDual: true
+      }
+    } else {
+      return {
+        primary: `${workout.turkish_get_ups} @ ${formatWeight(workout.getup_weight_1_kg || 16)}`,
+        secondary: null,
+        isDual: false
+      }
+    }
   }
 
   if (isLoading) {
@@ -60,8 +107,8 @@ export default function WorkoutList({ workouts, refresh, isLoading }) {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-      <div className="bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-4">
+    <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-6 py-4">
         <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
           <span>📝</span>
           Workout History
@@ -84,98 +131,125 @@ export default function WorkoutList({ workouts, refresh, isLoading }) {
           </div>
         ) : (
           <>
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-slate-200">
-                    <th className="text-left py-3 px-2 font-semibold text-slate-700">Date</th>
-                    <th className="text-left py-3 px-2 font-semibold text-slate-700">Swings</th>
-                    <th className="text-left py-3 px-2 font-semibold text-slate-700">Get-Ups</th>
-                    <th className="text-left py-3 px-2 font-semibold text-slate-700">Rating</th>
-                    <th className="text-right py-3 px-2 font-semibold text-slate-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {workouts.map((workout) => {
-                    const rating = getWorkoutRating(workout.kettlebell_swings, workout.turkish_get_ups)
-                    return (
-                      <tr key={workout.id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                        <td className="py-4 px-2 text-slate-900">
-                          {formatDate(workout.date)}
-                        </td>
-                        <td className="py-4 px-2">
-                          <span className="inline-flex items-center gap-1">
-                            <span>🔄</span>
-                            <span className="font-medium text-slate-900">{workout.kettlebell_swings}</span>
-                          </span>
-                        </td>
-                        <td className="py-4 px-2">
-                          <span className="inline-flex items-center gap-1">
-                            <span>⬆️</span>
-                            <span className="font-medium text-slate-900">{workout.turkish_get_ups}</span>
-                          </span>
-                        </td>
-                        <td className="py-4 px-2">
-                          <span className={`inline-flex items-center gap-1 font-medium ${rating.color}`}>
-                            <span>{rating.emoji}</span>
-                            <span>{rating.text}</span>
-                          </span>
-                        </td>
-                        <td className="py-4 px-2 text-right">
-                          <button
-                            onClick={() => handleDelete(workout.id)}
-                            disabled={deletingId === workout.id}
-                            className="text-red-500 hover:text-red-700 font-medium text-sm px-3 py-1 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
-                          >
-                            {deletingId === workout.id ? "..." : "Delete"}
-                          </button>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile Card View */}
-            <div className="md:hidden space-y-3">
+            {/* Enhanced Card View */}
+            <div className="space-y-4">
               {workouts.map((workout) => {
                 const rating = getWorkoutRating(workout.kettlebell_swings, workout.turkish_get_ups)
+                const volume = calculateVolume(workout)
+                const getUpDisplay = getGetUpDisplay(workout)
+                
                 return (
-                  <div key={workout.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-                    <div className="flex justify-between items-start mb-3">
+                  <div key={workout.id} className={`bg-white/10 backdrop-blur-lg rounded-2xl p-6 border-2 ${rating.borderColor} hover:bg-white/20 transition-all duration-300`}>
+                    {/* Header */}
+                    <div className="flex justify-between items-start mb-4">
                       <div>
-                        <div className="font-semibold text-slate-900">
+                        <div className="font-bold text-lg text-white mb-1">
                           {formatDate(workout.date)}
                         </div>
-                        <div className={`text-sm font-medium ${rating.color} flex items-center gap-1 mt-1`}>
-                          <span>{rating.emoji}</span>
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${rating.color} ${rating.bgColor}/20 border ${rating.borderColor}`}>
+                          <span className="text-base">{rating.emoji}</span>
                           <span>{rating.text}</span>
                         </div>
                       </div>
                       <button
                         onClick={() => handleDelete(workout.id)}
                         disabled={deletingId === workout.id}
-                        className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50"
+                        className="text-red-400 hover:text-red-300 text-sm px-3 py-2 rounded-lg hover:bg-red-500/20 transition-colors disabled:opacity-50 font-medium"
                       >
-                        {deletingId === workout.id ? "..." : "Delete"}
+                        {deletingId === workout.id ? "Deleting..." : "🗑️ Delete"}
                       </button>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2">
-                        <span>🔄</span>
-                        <div>
-                          <div className="text-lg font-bold text-slate-900">{workout.kettlebell_swings}</div>
-                          <div className="text-xs text-slate-500">Swings</div>
+
+                    {/* Main Stats */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                      {/* Swings Section */}
+                      <div className="bg-blue-500/20 backdrop-blur-sm rounded-xl p-4 border border-blue-400/30">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="text-2xl">🔄</div>
+                          <div>
+                            <div className="font-semibold text-blue-200">Kettlebell Swings</div>
+                            <div className="text-sm text-blue-300">{workout.swing_style || "2-handed"}</div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-2xl font-bold text-blue-100">{workout.kettlebell_swings}</div>
+                            <div className="text-xs text-blue-300">Reps</div>
+                          </div>
+                          <div>
+                            <div className="text-lg font-semibold text-blue-100">{formatWeight(workout.swing_weight_kg || 16)}</div>
+                            <div className="text-xs text-blue-300">Weight</div>
+                          </div>
+                        </div>
+                        <div className="mt-3 pt-3 border-t border-blue-400/30">
+                          <div className="text-sm text-blue-200">
+                            <span className="font-medium">Volume: </span>
+                            {formatVolume(volume.swing)}{useImperial ? "lbs" : "kg"}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span>⬆️</span>
-                        <div>
-                          <div className="text-lg font-bold text-slate-900">{workout.turkish_get_ups}</div>
-                          <div className="text-xs text-slate-500">Get-Ups</div>
+
+                      {/* Get-Ups Section */}
+                      <div className="bg-purple-500/20 backdrop-blur-sm rounded-xl p-4 border border-purple-400/30">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="text-2xl">⬆️</div>
+                          <div>
+                            <div className="font-semibold text-purple-200">Turkish Get-Ups</div>
+                            <div className="text-sm text-purple-300">{getUpDisplay.isDual ? "Mixed weights" : "Single weight"}</div>
+                          </div>
+                        </div>
+                        
+                        {getUpDisplay.isDual ? (
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center bg-purple-400/20 rounded-lg px-3 py-2">
+                              <span className="text-sm font-medium text-purple-100">{getUpDisplay.primary}</span>
+                              <span className="text-xs text-purple-300">Weight 1</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-purple-400/20 rounded-lg px-3 py-2">
+                              <span className="text-sm font-medium text-purple-100">{getUpDisplay.secondary}</span>
+                              <span className="text-xs text-purple-300">Weight 2</span>
+                            </div>
+                            <div className="text-center pt-2">
+                              <div className="text-lg font-bold text-purple-100">{workout.turkish_get_ups} total</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-2xl font-bold text-purple-100">{workout.turkish_get_ups}</div>
+                              <div className="text-xs text-purple-300">Reps</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-semibold text-purple-100">{formatWeight(workout.getup_weight_1_kg || 16)}</div>
+                              <div className="text-xs text-purple-300">Weight</div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="mt-3 pt-3 border-t border-purple-400/30">
+                          <div className="text-sm text-purple-200">`
+                            <span className="font-medium">Volume: </span>
+                            {formatVolume(volume.getUp)}{useImperial ? "lbs" : "kg"}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Total Volume Summary */}
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-4 border border-green-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="text-xl">�</div>
+                          <div>
+                            <div className="font-semibold text-green-800">Total Session Volume</div>
+                            <div className="text-sm text-green-600">Combined workout load</div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-green-900">
+                            {formatVolume(volume.total)}<span className="text-lg">{useImperial ? "lbs" : "kg"}</span>
+                          </div>
+                          <div className="text-xs text-green-700">Total Volume</div>
                         </div>
                       </div>
                     </div>
@@ -185,23 +259,23 @@ export default function WorkoutList({ workouts, refresh, isLoading }) {
             </div>
 
             {/* Summary Stats */}
-            <div className="mt-6 pt-6 border-t border-slate-200">
+            <div className="mt-6 pt-6 border-t border-white/20">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">{workouts.length}</div>
-                  <div className="text-sm text-slate-500">Total Sessions</div>
+                  <div className="text-2xl font-bold text-white">{workouts.length}</div>
+                  <div className="text-sm text-white/70">Total Sessions</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-white">
                     {workouts.reduce((sum, w) => sum + w.kettlebell_swings, 0).toLocaleString()}
                   </div>
-                  <div className="text-sm text-slate-500">Total Swings</div>
+                  <div className="text-sm text-white/70">Total Swings</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-slate-900">
+                  <div className="text-2xl font-bold text-white">
                     {workouts.reduce((sum, w) => sum + w.turkish_get_ups, 0).toLocaleString()}
                   </div>
-                  <div className="text-sm text-slate-500">Total Get-Ups</div>
+                  <div className="text-sm text-white/70">Total Get-Ups</div>
                 </div>
               </div>
             </div>
