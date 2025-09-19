@@ -21,9 +21,14 @@
   </p>
 </div>
 
+![Main App](Simple%20and%20Sinister%20App.png)
+![Chart](Simple%20and%20Sinister%20Chart.png)
+![History](Simple%20and%20Sinister%20History.png)
+
 ## About The Project
 
-![Simple & Sinister Workout Tracker Screenshot](Simple%20and%20Sinister%20App.png)
+
+
 
 Simple & Sinister is a minimalist kettlebell program that focuses on just two exercises: kettlebell swings and Turkish get-ups. This tracker helps you log your workouts, track your progress, and maintain consistency in your training.
 
