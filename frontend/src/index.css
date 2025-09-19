@@ -197,14 +197,52 @@ body {
   @apply bg-gray-100 text-gray-900;
 }
 
+/* Enhanced dropdown styling for dark theme consistency */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px !important;
+}
+
 /* Dark theme select dropdown styling */
 select[name="swing_weight_kg"],
-select[name="getup_weight_kg"] {
+select[name="getup_weight_kg"],
+select[name="swing_style"],
+select[name="getup_weight_1_kg"],
+select[name="getup_weight_2_kg"] {
   color-scheme: dark;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 12px !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
 }
 
 select[name="swing_weight_kg"] option,
-select[name="getup_weight_kg"] option {
+select[name="getup_weight_kg"] option,
+select[name="swing_style"] option,
+select[name="getup_weight_1_kg"] option,
+select[name="getup_weight_2_kg"] option {
   background-color: #1e293b !important; /* slate-800 */
   color: white !important;
+  border-radius: 8px !important;
+}
+
+/* Year selector in heatmap */
+select[value] {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 8px !important;
+  color: white !important;
+  backdrop-filter: blur(10px);
+}
+
+/* Focus states for all selects */
+select:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgb(168, 85, 247) !important; /* purple-500 ring */
+  border-color: transparent !important;
 }
