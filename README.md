@@ -1,7 +1,7 @@
 # Simple & Sinister Workout Tracker
 
 <div align="center">
-  <a href="https://github.com/yourusername/workout-tracker">
+  <a href="https://github.com/siwelyllek/simple-sinister-tracker">
     <img src="frontend/public/favicon.svg" alt="Logo" width="80" height="80">
   </a>
 
@@ -15,9 +15,9 @@
     <br />
     <a href="#getting-started">Quick Start</a>
     ·
-    <a href="https://github.com/siwelyllek/workout-tracker/issues">Report Bug</a>
+    <a href="https://github.com/siwelyllek/simple-sinister-tracker/issues">Report Bug</a>
     ·
-    <a href="https://github.com/siwelyllek/workout-tracker/issues">Request Feature</a>
+    <a href="https://github.com/siwelyllek/simple-sinister-tracker/issues">Request Feature</a>
   </p>
 </div>
 
@@ -71,7 +71,7 @@ The only requirement is Docker and Docker Compose. No need to install Node.js, P
 
 1. Clone the repository
    ```sh
-   git clone https://github.com/siwelyllek/workout-tracker.git
+   git clone https://github.com/siwelyllek/simple-sinister-tracker.git
    ```
 
 2. Navigate to the project directory
@@ -186,4 +186,5 @@ Distributed under the MIT License.
 [TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
 [Tailwind-url]: https://tailwindcss.com/
 [SQLite]: https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white
+
 [SQLite-url]: https://www.sqlite.org/
