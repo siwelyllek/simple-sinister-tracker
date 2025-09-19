@@ -14,6 +14,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN chown -R appuser:appuser /app
 
+# Create data directory with proper permissions
+RUN mkdir -p /app/data && chown -R appuser:appuser /app/data
+
 # Switch to non-root user
 USER appuser
 
