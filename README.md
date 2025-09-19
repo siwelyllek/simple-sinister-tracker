@@ -21,9 +21,9 @@
   </p>
 </div>
 
-![Main App](Simple%20and%20Sinister%20App.png)
-![Chart](Simple%20and%20Sinister%20Chart.png)
-![History](Simple%20and%20Sinister%20History.png)
+![Main App](images/Simple%20and%20Sinister%20App.png)
+![Chart](images/Simple%20and%20Sinister%20Chart.png)
+![History](images/Simple%20and%20Sinister%20History.png)
 
 ## About The Project
 
