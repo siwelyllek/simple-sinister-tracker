@@ -111,7 +111,7 @@ export default function Charts({ workouts, isLoading }) {
     {
       title: "Avg Swings",
       value: stats.avgSwings,
-      icon: "�",
+      icon: "📈",
       color: "from-indigo-500 to-indigo-600",
       bgColor: "bg-indigo-50",
       textColor: "text-indigo-600"

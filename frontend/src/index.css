@@ -200,7 +200,7 @@ body {
 /* Enhanced dropdown styling for dark theme consistency */
 select {
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 16px;
@@ -221,23 +221,45 @@ select[name="getup_weight_2_kg"] {
   backdrop-filter: blur(10px);
 }
 
+/* Enhanced option styling with better contrast and rounded corners */
 select[name="swing_weight_kg"] option,
 select[name="getup_weight_kg"] option,
 select[name="swing_style"] option,
 select[name="getup_weight_1_kg"] option,
 select[name="getup_weight_2_kg"] option {
-  background-color: #1e293b !important; /* slate-800 */
-  color: white !important;
+  background-color: #0f172a !important; /* slate-900 for better contrast */
+  color: #f1f5f9 !important; /* slate-100 for better readability */
+  padding: 8px 12px !important;
   border-radius: 8px !important;
+  border: 1px solid #334155 !important; /* slate-700 */
+  margin: 2px !important;
 }
 
-/* Year selector in heatmap */
+/* Hover states for options (limited browser support but improves where available) */
+select[name="swing_weight_kg"] option:hover,
+select[name="getup_weight_kg"] option:hover,
+select[name="swing_style"] option:hover,
+select[name="getup_weight_1_kg"] option:hover,
+select[name="getup_weight_2_kg"] option:hover {
+  background-color: #1e293b !important; /* slate-800 */
+  color: #a855f7 !important; /* purple-500 */
+}
+
+/* Year selector in heatmap with improved dropdown styling */
 select[value] {
   background-color: rgba(255, 255, 255, 0.2) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   border-radius: 8px !important;
   color: white !important;
   backdrop-filter: blur(10px);
+}
+
+/* Year selector options */
+select[value] option {
+  background-color: #0f172a !important; /* slate-900 */
+  color: #f1f5f9 !important; /* slate-100 */
+  padding: 6px 10px !important;
+  border-radius: 6px !important;
 }
 
 /* Focus states for all selects */
