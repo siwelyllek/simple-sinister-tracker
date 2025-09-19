@@ -4,6 +4,21 @@ import Heatmap from './components/Heatmap';
 import WorkoutList from './components/WorkoutList';
 import CustomSelect from './components/CustomSelect';
 
+// Dynamic API URL function that works from any device
+const getApiUrl = () => {
+  // If VITE_API_URL is set in environment, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Otherwise, dynamically construct based on current host
+  const protocol = window.location.protocol; // http: or https:
+  const hostname = window.location.hostname; // localhost, 192.168.1.175, etc.
+  const apiPort = '8225'; // Backend port
+  
+  return `${protocol}//${hostname}:${apiPort}`;
+};
+
 function App() {
   const [workouts, setWorkouts] = useState([]);
   
@@ -68,7 +83,7 @@ function App() {
 
   const fetchWorkouts = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = getApiUrl();
       const response = await axios.get(`${API_URL}/workouts/`);
       setWorkouts(response.data);
     } catch (error) {
@@ -102,7 +117,7 @@ function App() {
         swing_style: formData.swing_style
       };
       
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = getApiUrl();
       await axios.post(`${API_URL}/workouts/`, workoutData);
       
       // Reset form and refresh workouts
@@ -129,7 +144,7 @@ function App() {
 
   const deleteWorkout = async (workoutId) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = getApiUrl();
       await axios.delete(`${API_URL}/workouts/${workoutId}`);
       await fetchWorkouts();
     } catch (error) {

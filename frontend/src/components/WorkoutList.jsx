@@ -1,7 +1,20 @@
 import React, { useState } from "react"
 import axios from "axios"
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000"
+// Dynamic API URL function that works from any device
+const getApiUrl = () => {
+  // If VITE_API_URL is set in environment, use it
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Otherwise, dynamically construct based on current host
+  const protocol = window.location.protocol; // http: or https:
+  const hostname = window.location.hostname; // localhost, 192.168.1.175, etc.
+  const apiPort = '8225'; // Backend port
+  
+  return `${protocol}//${hostname}:${apiPort}`;
+};
 
 export default function WorkoutList({ workouts, refresh, isLoading, useImperial = false }) {
   const [deletingId, setDeletingId] = useState(null)
@@ -11,6 +24,7 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
     
     setDeletingId(id)
     try {
+      const API = getApiUrl();
       await axios.delete(`${API}/workouts/${id}`)
       refresh()
     } catch (error) {
