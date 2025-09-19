@@ -227,7 +227,7 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
                         )}
                         
                         <div className="mt-3 pt-3 border-t border-purple-400/30">
-                          <div className="text-sm text-purple-200">`
+                          <div className="text-sm text-purple-200">
                             <span className="font-medium">Volume: </span>
                             {formatVolume(volume.getUp)}{useImperial ? "lbs" : "kg"}
                           </div>
