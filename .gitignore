@@ -1,0 +1,106 @@
+# Database files
+backend/workout.db
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# Docker volumes and data
+data/
+postgres_data/
+db_data/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+
+# Node.js dependencies
+frontend/node_modules/
+node_modules/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+build/
+dist/
+
+# Logs
+*.log
+logs/
+backend/*.log
+frontend/*.log
+
+# Python cache
+backend/__pycache__/
+backend/**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker related
+.dockerignore
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Coverage reports
+coverage/
+.coverage
+.nyc_output
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# next.js build output
+.next
+
+# Nuxt.js build output
+.nuxt
+
+# Vite cache
+.vite/
+
+# Local SSL certificates
+*.pem
+*.key
+*.crt
