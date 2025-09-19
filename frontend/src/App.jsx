@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Heatmap from './components/Heatmap';
 import WorkoutList from './components/WorkoutList';
+import CustomSelect from './components/CustomSelect';
 
 function App() {
   const [workouts, setWorkouts] = useState([]);
@@ -212,27 +213,23 @@ function App() {
                     className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     min="0"
                   />
-                  <select
+                  <CustomSelect
                     name="swing_weight_kg"
                     value={formData.swing_weight_kg}
                     onChange={handleInputChange}
-                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
-                  >
-                    {getWeightOptions().map(option => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                  <select
+                    options={getWeightOptions()}
+                    placeholder="Select weight"
+                  />
+                  <CustomSelect
                     name="swing_style"
                     value={formData.swing_style}
                     onChange={handleInputChange}
-                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white"
-                  >
-                    <option value="2-handed">2-handed</option>
-                    <option value="1-handed">1-handed</option>
-                  </select>
+                    options={[
+                      { value: "2-handed", label: "2-handed" },
+                      { value: "1-handed", label: "1-handed" }
+                    ]}
+                    placeholder="Select style"
+                  />
                 </div>
               </div>
 
@@ -264,18 +261,14 @@ function App() {
                       className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                       min="0"
                     />
-                    <select
+                    <CustomSelect
                       name="getup_weight_1_kg"
                       value={formData.getup_weight_1_kg}
                       onChange={handleInputChange}
-                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white text-sm"
-                    >
-                      {getWeightOptions().map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                      options={getWeightOptions()}
+                      placeholder="Weight"
+                      className="text-sm"
+                    />
                   </div>
                 </div>
 
@@ -294,19 +287,17 @@ function App() {
                       className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
                       min="0"
                     />
-                    <select
+                    <CustomSelect
                       name="getup_weight_2_kg"
                       value={formData.getup_weight_2_kg}
                       onChange={handleInputChange}
-                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent [&>option]:bg-slate-800 [&>option]:text-white text-sm"
-                    >
-                      <option value="">No second weight</option>
-                      {getWeightOptions().map(option => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                      options={[
+                        { value: "", label: "No second weight" },
+                        ...getWeightOptions()
+                      ]}
+                      placeholder="Weight"
+                      className="text-sm"
+                    />
                   </div>
                 </div>
               </div>
