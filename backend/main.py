@@ -10,8 +10,12 @@ import schemas
 import crud
 import database
 from crud import WorkoutNotFoundError, WorkoutDatabaseError
+from migrations import migrate_database
 
 models.Base.metadata.create_all(bind=database.engine)
+
+# Run database migrations
+migrate_database()
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
