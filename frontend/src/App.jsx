@@ -210,6 +210,31 @@ function App() {
     e.preventDefault();
     setIsLoading(true);
     
+    // Custom validation for required fields
+    const requiredFields = [];
+    
+    if (!formData.kettlebell_swings || parseInt(formData.kettlebell_swings) <= 0) {
+      requiredFields.push('Kettlebell Swings amount');
+    }
+    
+    if (!formData.swing_weight_kg || formData.swing_weight_kg === '') {
+      requiredFields.push('Swing Weight');
+    }
+    
+    if (!formData.getup_reps_1 || parseInt(formData.getup_reps_1) <= 0) {
+      requiredFields.push('Weight 1 Reps');
+    }
+    
+    if (!formData.getup_weight_1_kg || formData.getup_weight_1_kg === '') {
+      requiredFields.push('Weight 1 Weight');
+    }
+    
+    if (requiredFields.length > 0) {
+      alert(`Please fill in the following required fields:\n• ${requiredFields.join('\n• ')}`);
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const workoutData = {
         date: formData.date,
@@ -351,7 +376,7 @@ function App() {
 
               <div>
                 <label htmlFor="kettlebell_swings" className={`block text-sm font-medium text-${theme.text} mb-2`}>
-                  Kettlebell Swings
+                  Kettlebell Swings <span className="text-red-400">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <input
@@ -363,13 +388,14 @@ function App() {
                     placeholder="100"
                     className={`px-4 py-3 bg-${theme.glass} border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:border-transparent`}
                     min="0"
+                    required
                   />
                   <CustomSelect
                     name="swing_weight_kg"
                     value={formData.swing_weight_kg}
                     onChange={handleInputChange}
                     options={getWeightOptions()}
-                    placeholder="Select weight"
+                    placeholder="Select weight *"
                     theme={theme}
                   />
                   <CustomSelect
@@ -410,7 +436,7 @@ function App() {
                 {/* First weight input */}
                 <div className="mb-3">
                   <label className={`block text-xs font-medium text-${theme.accent}-300 mb-1`}>
-                    Weight 1
+                    Weight 1 <span className="text-red-400">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <input
@@ -421,13 +447,14 @@ function App() {
                       placeholder="Reps"
                       className={`px-3 py-2 bg-${theme.glass} border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:border-transparent text-sm`}
                       min="0"
+                      required
                     />
                     <CustomSelect
                       name="getup_weight_1_kg"
                       value={formData.getup_weight_1_kg}
                       onChange={handleInputChange}
                       options={getWeightOptions()}
-                      placeholder="Weight"
+                      placeholder="Weight *"
                       className="text-sm"
                       theme={theme}
                     />
