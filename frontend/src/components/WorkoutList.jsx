@@ -1,7 +1,24 @@
 import React, { useState } from "react"
 import axios from "axios"
 
-const API = import.meta.env.VITE_API_URL || "http://localhost:8000"
+// Dynamic API URL function that works from any device
+const getApiUrl = () => {
+  // If VITE_API_URL is set in environment, use it
+  if (import.meta.env.VITE_API_URL) {
+    console.log('WorkoutList - Using environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Otherwise, dynamically construct based on current host
+  const protocol = window.location.protocol; // http: or https:
+  const hostname = window.location.hostname; // localhost, 192.168.1.175, etc.
+  const apiPort = '8225'; // Backend port
+  
+  const apiUrl = `${protocol}//${hostname}:${apiPort}`;
+  console.log('WorkoutList - Dynamic API URL constructed:', apiUrl);
+  
+  return apiUrl;
+};
 
 export default function WorkoutList({ workouts, refresh, isLoading, useImperial = false }) {
   const [deletingId, setDeletingId] = useState(null)
@@ -11,6 +28,7 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
     
     setDeletingId(id)
     try {
+      const API = getApiUrl();
       await axios.delete(`${API}/workouts/${id}`)
       refresh()
     } catch (error) {
@@ -168,7 +186,9 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
                           <div className="text-2xl">🔄</div>
                           <div>
                             <div className="font-semibold text-blue-200">Kettlebell Swings</div>
-                            <div className="text-sm text-blue-300">{workout.swing_style || "2-handed"}</div>
+                            <div className="text-sm text-blue-300">
+                              {workout.swing_style || "2-handed"} • {workout.swing_workout_type || "Standard"}
+                            </div>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -195,7 +215,9 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
                           <div className="text-2xl">⬆️</div>
                           <div>
                             <div className="font-semibold text-purple-200">Turkish Get-Ups</div>
-                            <div className="text-sm text-purple-300">{getUpDisplay.isDual ? "Mixed weights" : "Single weight"}</div>
+                            <div className="text-sm text-purple-300">
+                              {getUpDisplay.isDual ? "Mixed weights" : "Single weight"} • {workout.getup_workout_type || "Standard"}
+                            </div>
                           </div>
                         </div>
                         

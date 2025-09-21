@@ -10,8 +10,12 @@ import schemas
 import crud
 import database
 from crud import WorkoutNotFoundError, WorkoutDatabaseError
+from migrations import migrate_database
 
 models.Base.metadata.create_all(bind=database.engine)
+
+# Run database migrations
+migrate_database()
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
@@ -49,7 +53,15 @@ app.add_middleware(
         "http://localhost:3000",  # Local development
         "http://127.0.0.1:3000",  # Alternative localhost
         "http://0.0.0.0:3000",    # Docker networking
+        "http://localhost:3122",  # New frontend port
+        "http://127.0.0.1:3122",  # Alternative localhost for new port
+        "http://0.0.0.0:3122",    # Docker networking for new port
+        # Allow local network access (common private IP ranges)
+        "http://192.168.1.*:3122",  # Local network on port 3122
+        "http://10.*.*.*:3122",     # Another common private range
+        "http://172.16.*.*:3122",   # Third private range
     ],
+    allow_origin_regex=r"http://192\.168\.\d{1,3}\.\d{1,3}:3122",  # Allow any 192.168.x.x:3122
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE"],  # Only needed methods
     allow_headers=["*"],

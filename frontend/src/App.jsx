@@ -4,6 +4,26 @@ import Heatmap from './components/Heatmap';
 import WorkoutList from './components/WorkoutList';
 import CustomSelect from './components/CustomSelect';
 
+// Dynamic API URL function that works from any device
+const getApiUrl = () => {
+  // If VITE_API_URL is set in environment, use it
+  if (import.meta.env.VITE_API_URL) {
+    console.log('Using environment VITE_API_URL:', import.meta.env.VITE_API_URL);
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Otherwise, dynamically construct based on current host
+  const protocol = window.location.protocol; // http: or https:
+  const hostname = window.location.hostname; // localhost, 192.168.1.175, etc.
+  const apiPort = '8225'; // Backend port
+  
+  const apiUrl = `${protocol}//${hostname}:${apiPort}`;
+  console.log('Dynamic API URL constructed:', apiUrl);
+  console.log('Current window location:', window.location.href);
+  
+  return apiUrl;
+};
+
 function App() {
   const [workouts, setWorkouts] = useState([]);
   
@@ -36,6 +56,24 @@ function App() {
     }));
   };
   
+  // Generate workout type options
+  const getSwingWorkoutTypes = () => [
+    { value: "Standard", label: "Standard" },
+    { value: "EMOM", label: "EMOM" },
+    { value: "Ladders", label: "Ladders" },
+    { value: "Clusters", label: "Clusters" },
+    { value: "Descending", label: "Descending" },
+    { value: "Pyramid", label: "Pyramid" }
+  ];
+  
+  const getGetupWorkoutTypes = () => [
+    { value: "Standard", label: "Standard" },
+    { value: "EMOM", label: "EMOM" },
+    { value: "Complex", label: "Complex" },
+    { value: "Heavy Single", label: "Heavy Single" },
+    { value: "Alternating", label: "Alternating" }
+  ];
+  
   const [formData, setFormData] = useState({
     date: '', // Start empty, will be set in useEffect
     kettlebell_swings: '',
@@ -46,10 +84,84 @@ function App() {
     getup_reps_1: '',
     getup_weight_2_kg: '',
     getup_reps_2: '',
-    swing_style: '2-handed'
+    swing_style: '2-handed',
+    // Workout type tracking
+    swing_workout_type: 'Standard',
+    getup_workout_type: 'Standard'
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [useImperial, setUseImperial] = useState(false); // kg vs lbs toggle
+  
+  // Initialize useImperial from localStorage or default to false
+  const [useImperial, setUseImperial] = useState(() => {
+    const saved = localStorage.getItem('useImperial');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
+
+  // Initialize theme from localStorage or default to 'purple'
+  const [currentTheme, setCurrentTheme] = useState(() => {
+    const saved = localStorage.getItem('colorTheme');
+    return saved !== null ? saved : 'purple';
+  });
+
+  // Color themes definition
+  const themes = {
+    purple: {
+      name: 'Purple Galaxy',
+      primary: 'from-purple-900 via-purple-800 to-indigo-900',
+      accent: 'purple',
+      text: 'purple-200',
+      button: 'purple-600',
+      glass: 'white/10',
+      border: 'white/20'
+    },
+    ocean: {
+      name: 'Ocean Depths',
+      primary: 'from-blue-900 via-cyan-800 to-teal-900',
+      accent: 'cyan',
+      text: 'cyan-200',
+      button: 'cyan-600',
+      glass: 'white/10',
+      border: 'white/20'
+    },
+    sunset: {
+      name: 'Sunset Fire',
+      primary: 'from-orange-900 via-red-800 to-pink-900',
+      accent: 'orange',
+      text: 'orange-200',
+      button: 'orange-600',
+      glass: 'white/10',
+      border: 'white/20'
+    },
+    forest: {
+      name: 'Forest Night',
+      primary: 'from-green-900 via-emerald-800 to-teal-900',
+      accent: 'emerald',
+      text: 'emerald-200',
+      button: 'emerald-600',
+      glass: 'white/10',
+      border: 'white/20'
+    },
+    cosmic: {
+      name: 'Cosmic Void',
+      primary: 'from-gray-900 via-slate-800 to-zinc-900',
+      accent: 'slate',
+      text: 'slate-200',
+      button: 'slate-600',
+      glass: 'white/10',
+      border: 'white/20'
+    },
+    royal: {
+      name: 'Royal Gold',
+      primary: 'from-yellow-900 via-amber-800 to-orange-900',
+      accent: 'amber',
+      text: 'amber-200',
+      button: 'amber-600',
+      glass: 'white/10',
+      border: 'white/20'
+    }
+  };
+
+  const theme = themes[currentTheme];
 
   // Fetch workouts on component mount
   useEffect(() => {
@@ -57,6 +169,16 @@ function App() {
     // Also ensure we have today's date on mount
     setFormData(prev => ({ ...prev, date: getTodaysDate() }));
   }, []);
+
+  // Save useImperial preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('useImperial', JSON.stringify(useImperial));
+  }, [useImperial]);
+
+  // Save theme preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('colorTheme', currentTheme);
+  }, [currentTheme]);
 
   // Auto-calculate total turkish_get_ups when individual reps change
   useEffect(() => {
@@ -68,7 +190,7 @@ function App() {
 
   const fetchWorkouts = async () => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = getApiUrl();
       const response = await axios.get(`${API_URL}/workouts/`);
       setWorkouts(response.data);
     } catch (error) {
@@ -88,6 +210,31 @@ function App() {
     e.preventDefault();
     setIsLoading(true);
     
+    // Custom validation for required fields
+    const requiredFields = [];
+    
+    if (!formData.kettlebell_swings || parseInt(formData.kettlebell_swings) <= 0) {
+      requiredFields.push('Kettlebell Swings amount');
+    }
+    
+    if (!formData.swing_weight_kg || formData.swing_weight_kg === '') {
+      requiredFields.push('Swing Weight');
+    }
+    
+    if (!formData.getup_reps_1 || parseInt(formData.getup_reps_1) <= 0) {
+      requiredFields.push('Weight 1 Reps');
+    }
+    
+    if (!formData.getup_weight_1_kg || formData.getup_weight_1_kg === '') {
+      requiredFields.push('Weight 1 Weight');
+    }
+    
+    if (requiredFields.length > 0) {
+      alert(`Please fill in the following required fields:\n• ${requiredFields.join('\n• ')}`);
+      setIsLoading(false);
+      return;
+    }
+    
     try {
       const workoutData = {
         date: formData.date,
@@ -99,10 +246,13 @@ function App() {
         getup_reps_1: parseInt(formData.getup_reps_1) || 0,
         getup_weight_2_kg: formData.getup_weight_2_kg ? parseFloat(formData.getup_weight_2_kg) : null,
         getup_reps_2: parseInt(formData.getup_reps_2) || 0,
-        swing_style: formData.swing_style
+        swing_style: formData.swing_style,
+        // Workout type tracking
+        swing_workout_type: formData.swing_workout_type,
+        getup_workout_type: formData.getup_workout_type
       };
       
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = getApiUrl();
       await axios.post(`${API_URL}/workouts/`, workoutData);
       
       // Reset form and refresh workouts
@@ -116,7 +266,10 @@ function App() {
         getup_reps_1: '',
         getup_weight_2_kg: '',
         getup_reps_2: '',
-        swing_style: '2-handed'
+        swing_style: '2-handed',
+        // Workout type tracking
+        swing_workout_type: 'Standard',
+        getup_workout_type: 'Standard'
       });
       
       await fetchWorkouts();
@@ -129,7 +282,7 @@ function App() {
 
   const deleteWorkout = async (workoutId) => {
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = getApiUrl();
       await axios.delete(`${API_URL}/workouts/${workoutId}`);
       await fetchWorkouts();
     } catch (error) {
@@ -138,47 +291,67 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className={`min-h-screen bg-gradient-to-br ${theme.primary}`}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             Simple & Sinister
           </h1>
-          <p className="text-xl text-purple-200 max-w-2xl mx-auto">
+          <p className={`text-xl text-${theme.text} max-w-2xl mx-auto`}>
             Track your kettlebell workouts. Master the fundamentals.
           </p>
         </div>
 
         {/* Workout Form */}
         <div className="max-w-md mx-auto mb-12">
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+          <div className={`bg-${theme.glass} backdrop-blur-lg rounded-2xl p-8 border border-${theme.border}`}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">Log Workout</h2>
               
-              {/* Units Toggle */}
-              <div className="flex items-center gap-2">
-                <span className={`text-sm ${!useImperial ? 'text-white' : 'text-purple-300'}`}>kg</span>
-                <button
-                  type="button"
-                  onClick={() => setUseImperial(!useImperial)}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    useImperial ? 'bg-purple-600' : 'bg-white/20'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      useImperial ? 'translate-x-6' : 'translate-x-1'
+              {/* Controls Row */}
+              <div className="flex items-center gap-4">
+                {/* Theme Selector */}
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const themeKeys = Object.keys(themes);
+                      const currentIndex = themeKeys.indexOf(currentTheme);
+                      const nextIndex = (currentIndex + 1) % themeKeys.length;
+                      setCurrentTheme(themeKeys[nextIndex]);
+                    }}
+                    className={`p-2 bg-${theme.button}/20 border border-${theme.accent}-400/30 rounded-lg text-${theme.text} hover:bg-${theme.button}/30 transition-colors`}
+                    title={`Current: ${theme.name} - Click to change`}
+                  >
+                    🎨
+                  </button>
+                </div>
+                
+                {/* Units Toggle */}
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm ${!useImperial ? 'text-white' : `text-${theme.text}`}`}>kg</span>
+                  <button
+                    type="button"
+                    onClick={() => setUseImperial(!useImperial)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      useImperial ? `bg-${theme.button}` : 'bg-white/20'
                     }`}
-                  />
-                </button>
-                <span className={`text-sm ${useImperial ? 'text-white' : 'text-purple-300'}`}>lbs</span>
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        useImperial ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                  <span className={`text-sm ${useImperial ? 'text-white' : `text-${theme.text}`}`}>lbs</span>
+                </div>
               </div>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-purple-200 mb-2">
+                <label htmlFor="date" className={`block text-sm font-medium text-${theme.text} mb-2`}>
                   Date
                 </label>
                 <div className="flex gap-2">
@@ -188,13 +361,13 @@ function App() {
                     name="date"
                     value={formData.date}
                     onChange={handleInputChange}
-                    className="flex-1 px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className={`flex-1 px-4 py-3 bg-${theme.glass} border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:border-transparent`}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, date: getTodaysDate() }))}
-                    className="px-3 py-3 bg-blue-500/20 border border-blue-400/30 rounded-xl text-blue-200 hover:bg-blue-500/30 transition-colors text-sm"
+                    className={`px-3 py-3 bg-${theme.button}/20 border border-${theme.accent}-400/30 rounded-xl text-${theme.text} hover:bg-${theme.button}/30 transition-colors text-sm`}
                   >
                     Today
                   </button>
@@ -202,10 +375,10 @@ function App() {
               </div>
 
               <div>
-                <label htmlFor="kettlebell_swings" className="block text-sm font-medium text-purple-200 mb-2">
-                  Kettlebell Swings
+                <label htmlFor="kettlebell_swings" className={`block text-sm font-medium text-${theme.text} mb-2`}>
+                  Kettlebell Swings <span className="text-red-400">*</span>
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <input
                     type="number"
                     id="kettlebell_swings"
@@ -213,15 +386,17 @@ function App() {
                     value={formData.kettlebell_swings}
                     onChange={handleInputChange}
                     placeholder="100"
-                    className="px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    className={`px-4 py-3 bg-${theme.glass} border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:border-transparent`}
                     min="0"
+                    required
                   />
                   <CustomSelect
                     name="swing_weight_kg"
                     value={formData.swing_weight_kg}
                     onChange={handleInputChange}
                     options={getWeightOptions()}
-                    placeholder="Select weight"
+                    placeholder="Select weight *"
+                    theme={theme}
                   />
                   <CustomSelect
                     name="swing_style"
@@ -232,27 +407,36 @@ function App() {
                       { value: "1-handed", label: "1-handed" }
                     ]}
                     placeholder="Select style"
+                    theme={theme}
+                  />
+                  <CustomSelect
+                    name="swing_workout_type"
+                    value={formData.swing_workout_type}
+                    onChange={handleInputChange}
+                    options={getSwingWorkoutTypes()}
+                    placeholder="Workout type"
+                    theme={theme}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
+                <label className={`block text-sm font-medium text-${theme.text} mb-2`}>
                   Turkish Get-ups
                 </label>
                 
                 {/* Total get-ups display */}
-                <div className="mb-3 p-3 bg-purple-500/20 rounded-lg border border-purple-400/30">
+                <div className={`mb-3 p-3 bg-${theme.button}/20 rounded-lg border border-${theme.accent}-400/30`}>
                   <div className="text-center">
-                    <span className="text-2xl font-bold text-purple-300">{formData.turkish_get_ups || 0}</span>
-                    <span className="text-sm text-purple-200 block">Total Get-ups</span>
+                    <span className={`text-2xl font-bold text-${theme.accent}-300`}>{formData.turkish_get_ups || 0}</span>
+                    <span className={`text-sm text-${theme.text} block`}>Total Get-ups</span>
                   </div>
                 </div>
 
                 {/* First weight input */}
                 <div className="mb-3">
-                  <label className="block text-xs font-medium text-purple-300 mb-1">
-                    Weight 1
+                  <label className={`block text-xs font-medium text-${theme.accent}-300 mb-1`}>
+                    Weight 1 <span className="text-red-400">*</span>
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <input
@@ -261,23 +445,25 @@ function App() {
                       value={formData.getup_reps_1}
                       onChange={handleInputChange}
                       placeholder="Reps"
-                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                      className={`px-3 py-2 bg-${theme.glass} border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:border-transparent text-sm`}
                       min="0"
+                      required
                     />
                     <CustomSelect
                       name="getup_weight_1_kg"
                       value={formData.getup_weight_1_kg}
                       onChange={handleInputChange}
                       options={getWeightOptions()}
-                      placeholder="Weight"
+                      placeholder="Weight *"
                       className="text-sm"
+                      theme={theme}
                     />
                   </div>
                 </div>
 
                 {/* Second weight input (optional) */}
                 <div>
-                  <label className="block text-xs font-medium text-purple-300 mb-1">
+                  <label className={`block text-xs font-medium text-${theme.accent}-300 mb-1`}>
                     Weight 2 (optional)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -287,7 +473,7 @@ function App() {
                       value={formData.getup_reps_2}
                       onChange={handleInputChange}
                       placeholder="Reps"
-                      className="px-3 py-2 bg-white/10 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+                      className={`px-3 py-2 bg-${theme.glass} border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:border-transparent text-sm`}
                       min="0"
                     />
                     <CustomSelect
@@ -300,15 +486,32 @@ function App() {
                       ]}
                       placeholder="Weight"
                       className="text-sm"
+                      theme={theme}
                     />
                   </div>
+                </div>
+
+                {/* Get-up workout type */}
+                <div>
+                  <label className={`block text-xs font-medium text-${theme.accent}-300 mb-1`}>
+                    Workout Type
+                  </label>
+                  <CustomSelect
+                    name="getup_workout_type"
+                    value={formData.getup_workout_type}
+                    onChange={handleInputChange}
+                    options={getGetupWorkoutTypes()}
+                    placeholder="Workout type"
+                    className="text-sm"
+                    theme={theme}
+                  />
                 </div>
               </div>
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-transparent"
+                className={`w-full bg-gradient-to-r from-${theme.button} to-${theme.accent}-600 hover:from-${theme.button} hover:to-${theme.accent}-700 disabled:opacity-50 text-white font-bold py-4 px-6 rounded-xl transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-${theme.accent}-500 focus:ring-offset-2 focus:ring-offset-transparent`}
               >
                 {isLoading ? 'Logging...' : 'Log Workout'}
               </button>
@@ -318,7 +521,7 @@ function App() {
 
         {/* Training Consistency Heatmap */}
         <div className="max-w-4xl mx-auto mb-12">
-          <Heatmap workouts={workouts} isLoading={isLoading} useImperial={useImperial} />
+          <Heatmap workouts={workouts} isLoading={isLoading} useImperial={useImperial} theme={theme} />
         </div>
 
         {/* Enhanced Workout List */}
@@ -329,13 +532,14 @@ function App() {
               refresh={fetchWorkouts} 
               isLoading={isLoading}
               useImperial={useImperial}
+              theme={theme}
             />
           </div>
         )}
 
         {workouts.length === 0 && (
           <div className="text-center">
-            <p className="text-purple-200 text-lg">No workouts logged yet. Start your journey!</p>
+            <p className={`text-${theme.text} text-lg`}>No workouts logged yet. Start your journey!</p>
           </div>
         )}
       </div>

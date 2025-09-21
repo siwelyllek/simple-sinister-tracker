@@ -7,13 +7,22 @@ export default function CustomSelect({
   onChange, 
   options, 
   className = "",
-  placeholder = "Select..."
+  placeholder = "Select...",
+  theme = null // Add theme prop with default
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [selectedLabel, setSelectedLabel] = useState("")
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 })
   const dropdownRef = useRef(null)
   const buttonRef = useRef(null)
+
+  // Default theme fallback
+  const defaultTheme = {
+    accent: 'purple',
+    glass: 'white/10',
+    border: 'white/20'
+  }
+  const currentTheme = theme || defaultTheme
 
   useEffect(() => {
     // Find the label for the current value
@@ -57,7 +66,7 @@ export default function CustomSelect({
   const dropdownContent = isOpen ? (
     <div 
       ref={dropdownRef}
-      className={`fixed bg-slate-800/95 backdrop-filter backdrop-blur-lg border border-white/20 rounded-xl shadow-xl max-h-60 overflow-auto ${
+      className={`fixed bg-slate-800/95 backdrop-filter backdrop-blur-lg border border-${currentTheme.border} rounded-xl shadow-xl max-h-60 overflow-auto ${
         className.includes('text-sm') ? 'rounded-lg' : ''
       }`}
       style={{
@@ -72,12 +81,12 @@ export default function CustomSelect({
           key={option.value}
           type="button"
           onClick={() => handleSelect(option.value)}
-          className={`w-full px-4 py-3 text-left hover:bg-purple-600/30 focus:bg-purple-600/30 focus:outline-none transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl ${
+          className={`w-full px-4 py-3 text-left hover:bg-${currentTheme.accent}-600/30 focus:bg-${currentTheme.accent}-600/30 focus:outline-none transition-colors duration-150 first:rounded-t-xl last:rounded-b-xl ${
             className.includes('text-sm') ? 'px-3 py-2 text-sm first:rounded-t-lg last:rounded-b-lg' : ''
           } ${
             value === option.value 
-              ? 'bg-purple-600/20 text-purple-200' 
-              : 'text-white hover:text-purple-100'
+              ? `bg-${currentTheme.accent}-600/20 text-${currentTheme.accent}-200` 
+              : `text-white hover:text-${currentTheme.accent}-100`
           }`}
         >
           {option.label}
@@ -94,7 +103,7 @@ export default function CustomSelect({
           ref={buttonRef}
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full px-4 py-3 bg-white/10 border border-white/30 rounded-xl text-white text-left focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent backdrop-filter backdrop-blur-lg flex items-center justify-between ${
+          className={`w-full px-4 py-3 bg-${currentTheme.glass} border border-white/30 rounded-xl text-white text-left focus:outline-none focus:ring-2 focus:ring-${currentTheme.accent}-500 focus:border-transparent backdrop-filter backdrop-blur-lg flex items-center justify-between ${
             className.includes('text-sm') ? 'px-3 py-2 rounded-lg text-sm' : ''
           }`}
         >
