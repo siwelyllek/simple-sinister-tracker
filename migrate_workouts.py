@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Host migration script to add workout type fields to existing workouts.
 Run this from the host machine to update your Docker volume database.
@@ -56,7 +57,7 @@ def migrate_workout_types(db_path):
                 ADD COLUMN getup_workout_type TEXT DEFAULT 'Standard'
             """)
             
-            print("✅ Workout type columns added successfully!")
+            print("[SUCCESS] Workout type columns added successfully!")
         else:
             print("Workout type columns already exist.")
         
@@ -84,7 +85,7 @@ def migrate_workout_types(db_path):
         # Commit the changes
         conn.commit()
         
-        print(f"✅ Successfully updated {total_workouts} workouts!")
+        print("[SUCCESS] Successfully updated {} workouts!".format(total_workouts))
         print("   - Swing workout type set to: EMOM")
         print("   - Get-up workout type set to: Standard")
         
@@ -98,15 +99,15 @@ def migrate_workout_types(db_path):
         print("\nWorkout type distribution:")
         for row in cursor.fetchall():
             swing_type, getup_type, count = row
-            print(f"  - {count} workouts: Swings={swing_type}, Get-ups={getup_type}")
+            print("  - {} workouts: Swings={}, Get-ups={}".format(count, swing_type, getup_type))
         
         return True
         
     except sqlite3.Error as e:
-        print(f"❌ Database error: {e}")
+        print("[ERROR] Database error: {}".format(e))
         return False
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print("[ERROR] Unexpected error: {}".format(e))
         return False
     finally:
         if conn:
@@ -114,29 +115,29 @@ def migrate_workout_types(db_path):
 
 def main():
     """Main function to run the migration."""
-    print("🔄 Starting workout type migration...")
+    print("Starting workout type migration...")
     
     # Find the database file
     db_path = find_database()
     
     if not db_path:
-        print("❌ Could not find the workout database file.")
+        print("[ERROR] Could not find the workout database file.")
         print("Please ensure:")
         print("1. Docker containers are running")
         print("2. You have created at least one workout")
         print("3. You're running this from the project root directory")
         sys.exit(1)
     
-    print(f"📍 Found database at: {db_path}")
+    print("Found database at: {}".format(db_path))
     
     success = migrate_workout_types(db_path)
     
     if success:
-        print("\n🎉 Migration completed successfully!")
+        print("\n[SUCCESS] Migration completed successfully!")
         print("Your existing workouts now have workout types assigned.")
         print("Refresh your browser to see the changes.")
     else:
-        print("\n❌ Migration failed. Please check the errors above.")
+        print("\n[ERROR] Migration failed. Please check the errors above.")
         sys.exit(1)
 
 if __name__ == "__main__":

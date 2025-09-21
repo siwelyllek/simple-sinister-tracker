@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 Migration script to add workout type fields to existing workouts.
 This script updates existing workouts to have:
@@ -18,7 +19,7 @@ def migrate_workout_types():
     """Add workout type columns and set default values for existing workouts."""
     
     if not os.path.exists(DB_PATH):
-        print(f"Database file not found at {DB_PATH}")
+        print("Database file not found at {}".format(DB_PATH))
         print("Please ensure the application has been run at least once to create the database.")
         return False
     
@@ -50,7 +51,7 @@ def migrate_workout_types():
                 ADD COLUMN getup_workout_type TEXT DEFAULT 'Standard'
             """)
             
-            print("✅ Workout type columns added successfully!")
+            print("[SUCCESS] Workout type columns added successfully!")
         else:
             print("Workout type columns already exist.")
         
@@ -78,7 +79,7 @@ def migrate_workout_types():
         # Commit the changes
         conn.commit()
         
-        print(f"✅ Successfully updated {total_workouts} workouts!")
+        print("[SUCCESS] Successfully updated {} workouts!".format(total_workouts))
         print("   - Swing workout type set to: EMOM")
         print("   - Get-up workout type set to: Standard")
         
@@ -92,15 +93,15 @@ def migrate_workout_types():
         print("\nWorkout type distribution:")
         for row in cursor.fetchall():
             swing_type, getup_type, count = row
-            print(f"  - {count} workouts: Swings={swing_type}, Get-ups={getup_type}")
+            print("  - {} workouts: Swings={}, Get-ups={}".format(count, swing_type, getup_type))
         
         return True
         
     except sqlite3.Error as e:
-        print(f"❌ Database error: {e}")
+        print("[ERROR] Database error: {}".format(e))
         return False
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        print("[ERROR] Unexpected error: {}".format(e))
         return False
     finally:
         if conn:
@@ -108,17 +109,17 @@ def migrate_workout_types():
 
 def main():
     """Main function to run the migration."""
-    print("🔄 Starting workout type migration...")
-    print(f"Database location: {DB_PATH}")
+    print("Starting workout type migration...")
+    print("Database location: {}".format(DB_PATH))
     
     success = migrate_workout_types()
     
     if success:
-        print("\n🎉 Migration completed successfully!")
+        print("\n[SUCCESS] Migration completed successfully!")
         print("Your existing workouts now have workout types assigned.")
         print("You can restart the application to see the changes.")
     else:
-        print("\n❌ Migration failed. Please check the errors above.")
+        print("\n[ERROR] Migration failed. Please check the errors above.")
         sys.exit(1)
 
 if __name__ == "__main__":
