@@ -1,23 +1,37 @@
-FROM python:3.11-slim
+# ===== OPTIMIZATION 1: Multi-stage build with Alpine =====
+FROM python:3.11-alpine as builder
+
+# Install build dependencies
+RUN apk add --no-cache gcc musl-dev linux-headers
+
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+# ===== FINAL STAGE =====
+FROM python:3.11-alpine
+
+# Install runtime dependencies only
+RUN apk add --no-cache libpq
 
 # Create non-root user
-RUN groupadd --gid 1000 appuser && \
-    useradd --uid 1000 --gid appuser --shell /bin/bash --create-home appuser
+RUN addgroup -g 1000 appuser && \
+    adduser -D -s /bin/sh -u 1000 -G appuser appuser
+
+# Copy Python packages from builder stage
+COPY --from=builder /root/.local /home/appuser/.local
+
+# Set PATH to include user packages
+ENV PATH=/home/appuser/.local/bin:$PATH
 
 WORKDIR /app
 
-# Install dependencies as root
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy app and set ownership
+COPY --chown=appuser:appuser . .
 
-# Copy app and change ownership
-COPY . .
-RUN chown -R appuser:appuser /app
-
-# Create data directory with proper permissions
+# Create data directory
 RUN mkdir -p /app/data && chown -R appuser:appuser /app/data
 
-# Switch to non-root user
 USER appuser
 
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

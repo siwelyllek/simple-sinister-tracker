@@ -4,14 +4,18 @@ services:
     volumes:
       - workoutdata:/app/data
     ports:
-      - "8225:8000"
+      - "127.0.0.1:8225:8000"  # Localhost only for security
+    environment:
+      - PYTHONPATH=/app
+      
   frontend:
     build: ./frontend
     ports:
-      - "3122:3000"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      - "127.0.0.1:3122:3000"  # Localhost only for security
     depends_on:
       - backend
+    environment:
+      - VITE_API_URL=http://localhost:8225
+
 volumes:
   workoutdata:
