@@ -13,11 +13,28 @@ class WorkoutBase(BaseModel):
     getup_weight_2_kg: Optional[float] = Field(None, gt=0, le=200, description="Secondary get-up weight in kilograms")
     getup_reps_2: int = Field(0, ge=0, le=100, description="Reps for secondary weight")
     swing_style: str = Field("2-handed", description="Swing style")
+    # Workout type tracking
+    swing_workout_type: str = Field("Standard", description="Type of swing workout")
+    getup_workout_type: str = Field("Standard", description="Type of get-up workout")
     
     @validator('swing_style')
     def validate_swing_style(cls, v):
         if v not in ["1-handed", "2-handed"]:
             raise ValueError('swing_style must be either "1-handed" or "2-handed"')
+        return v
+    
+    @validator('swing_workout_type')
+    def validate_swing_workout_type(cls, v):
+        allowed_types = ["Standard", "EMOM", "Ladders", "Clusters", "Descending", "Pyramid"]
+        if v not in allowed_types:
+            raise ValueError(f'swing_workout_type must be one of: {", ".join(allowed_types)}')
+        return v
+    
+    @validator('getup_workout_type')
+    def validate_getup_workout_type(cls, v):
+        allowed_types = ["Standard", "EMOM", "Complex", "Heavy Single", "Alternating"]
+        if v not in allowed_types:
+            raise ValueError(f'getup_workout_type must be one of: {", ".join(allowed_types)}')
         return v
     
     @validator('date')

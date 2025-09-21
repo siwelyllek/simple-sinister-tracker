@@ -56,6 +56,24 @@ function App() {
     }));
   };
   
+  // Generate workout type options
+  const getSwingWorkoutTypes = () => [
+    { value: "Standard", label: "Standard" },
+    { value: "EMOM", label: "EMOM" },
+    { value: "Ladders", label: "Ladders" },
+    { value: "Clusters", label: "Clusters" },
+    { value: "Descending", label: "Descending" },
+    { value: "Pyramid", label: "Pyramid" }
+  ];
+  
+  const getGetupWorkoutTypes = () => [
+    { value: "Standard", label: "Standard" },
+    { value: "EMOM", label: "EMOM" },
+    { value: "Complex", label: "Complex" },
+    { value: "Heavy Single", label: "Heavy Single" },
+    { value: "Alternating", label: "Alternating" }
+  ];
+  
   const [formData, setFormData] = useState({
     date: '', // Start empty, will be set in useEffect
     kettlebell_swings: '',
@@ -66,7 +84,10 @@ function App() {
     getup_reps_1: '',
     getup_weight_2_kg: '',
     getup_reps_2: '',
-    swing_style: '2-handed'
+    swing_style: '2-handed',
+    // Workout type tracking
+    swing_workout_type: 'Standard',
+    getup_workout_type: 'Standard'
   });
   const [isLoading, setIsLoading] = useState(false);
   
@@ -129,7 +150,10 @@ function App() {
         getup_reps_1: parseInt(formData.getup_reps_1) || 0,
         getup_weight_2_kg: formData.getup_weight_2_kg ? parseFloat(formData.getup_weight_2_kg) : null,
         getup_reps_2: parseInt(formData.getup_reps_2) || 0,
-        swing_style: formData.swing_style
+        swing_style: formData.swing_style,
+        // Workout type tracking
+        swing_workout_type: formData.swing_workout_type,
+        getup_workout_type: formData.getup_workout_type
       };
       
       const API_URL = getApiUrl();
@@ -146,7 +170,10 @@ function App() {
         getup_reps_1: '',
         getup_weight_2_kg: '',
         getup_reps_2: '',
-        swing_style: '2-handed'
+        swing_style: '2-handed',
+        // Workout type tracking
+        swing_workout_type: 'Standard',
+        getup_workout_type: 'Standard'
       });
       
       await fetchWorkouts();
@@ -235,7 +262,7 @@ function App() {
                 <label htmlFor="kettlebell_swings" className="block text-sm font-medium text-purple-200 mb-2">
                   Kettlebell Swings
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                   <input
                     type="number"
                     id="kettlebell_swings"
@@ -262,6 +289,13 @@ function App() {
                       { value: "1-handed", label: "1-handed" }
                     ]}
                     placeholder="Select style"
+                  />
+                  <CustomSelect
+                    name="swing_workout_type"
+                    value={formData.swing_workout_type}
+                    onChange={handleInputChange}
+                    options={getSwingWorkoutTypes()}
+                    placeholder="Workout type"
                   />
                 </div>
               </div>
@@ -332,6 +366,21 @@ function App() {
                       className="text-sm"
                     />
                   </div>
+                </div>
+
+                {/* Get-up workout type */}
+                <div>
+                  <label className="block text-xs font-medium text-purple-300 mb-1">
+                    Workout Type
+                  </label>
+                  <CustomSelect
+                    name="getup_workout_type"
+                    value={formData.getup_workout_type}
+                    onChange={handleInputChange}
+                    options={getGetupWorkoutTypes()}
+                    placeholder="Workout type"
+                    className="text-sm"
+                  />
                 </div>
               </div>
 

@@ -15,3 +15,6 @@ class Workout(Base):
     getup_weight_2_kg = Column(Float, nullable=True)  # Second weight (optional)
     getup_reps_2 = Column(Integer, default=0)        # Reps at second weight
     swing_style = Column(String, default="2-handed")  # "1-handed" or "2-handed"
+    # Workout type tracking
+    swing_workout_type = Column(String, default="Standard")  # "Standard", "EMOM", "Ladders", etc.
+    getup_workout_type = Column(String, default="Standard")  # "Standard", "EMOM", "Complex", etc.

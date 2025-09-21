@@ -62,7 +62,7 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
         const kgToLbs = (kg) => Math.round(kg * 2.20462);
         const swingWeightDisplay = useImperial ? `${kgToLbs(detail.swingWeight)}lbs` : `${detail.swingWeight}kg`;
         
-        tooltipContent += `${detail.swings} ${detail.swingStyle} swings @ ${swingWeightDisplay}\n`;
+        tooltipContent += `${detail.swings} ${detail.swingStyle} swings (${detail.swingWorkoutType}) @ ${swingWeightDisplay}\n`;
         
         // Handle dual get-up weights
         if (detail.getUpReps2 > 0 && detail.getUpWeight2) {
@@ -70,11 +70,11 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
           const weight1Display = useImperial ? `${kgToLbs(detail.getUpWeight1)}lbs` : `${detail.getUpWeight1}kg`;
           const weight2Display = useImperial ? `${kgToLbs(detail.getUpWeight2)}lbs` : `${detail.getUpWeight2}kg`;
           tooltipContent += `${detail.getUpReps1} get-ups @ ${weight1Display}\n`;
-          tooltipContent += `${detail.getUpReps2} get-ups @ ${weight2Display}`;
+          tooltipContent += `${detail.getUpReps2} get-ups @ ${weight2Display} (${detail.getupWorkoutType})`;
         } else {
           // Single weight used
           const weight1Display = useImperial ? `${kgToLbs(detail.getUpWeight1)}lbs` : `${detail.getUpWeight1}kg`;
-          tooltipContent += `${detail.getUps} get-ups @ ${weight1Display}`;
+          tooltipContent += `${detail.getUps} get-ups (${detail.getupWorkoutType}) @ ${weight1Display}`;
         }
       } else {
         tooltipContent += `${value.workouts} workouts - ${value.swings} total swings, ${value.getUps} total get-ups`;
@@ -128,7 +128,10 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
           getUpReps1: workout.getup_reps_1 || 0,
           getUpWeight2: workout.getup_weight_2_kg,
           getUpReps2: workout.getup_reps_2 || 0,
-          swingStyle: workout.swing_style || "2-handed"
+          swingStyle: workout.swing_style || "2-handed",
+          // Workout types
+          swingWorkoutType: workout.swing_workout_type || "Standard",
+          getupWorkoutType: workout.getup_workout_type || "Standard"
         });
       });
 

@@ -186,7 +186,9 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
                           <div className="text-2xl">🔄</div>
                           <div>
                             <div className="font-semibold text-blue-200">Kettlebell Swings</div>
-                            <div className="text-sm text-blue-300">{workout.swing_style || "2-handed"}</div>
+                            <div className="text-sm text-blue-300">
+                              {workout.swing_style || "2-handed"} • {workout.swing_workout_type || "Standard"}
+                            </div>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -213,7 +215,9 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
                           <div className="text-2xl">⬆️</div>
                           <div>
                             <div className="font-semibold text-purple-200">Turkish Get-Ups</div>
-                            <div className="text-sm text-purple-300">{getUpDisplay.isDual ? "Mixed weights" : "Single weight"}</div>
+                            <div className="text-sm text-purple-300">
+                              {getUpDisplay.isDual ? "Mixed weights" : "Single weight"} • {workout.getup_workout_type || "Standard"}
+                            </div>
                           </div>
                         </div>
                         
