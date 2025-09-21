@@ -69,7 +69,12 @@ function App() {
     swing_style: '2-handed'
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [useImperial, setUseImperial] = useState(false); // kg vs lbs toggle
+  
+  // Initialize useImperial from localStorage or default to false
+  const [useImperial, setUseImperial] = useState(() => {
+    const saved = localStorage.getItem('useImperial');
+    return saved !== null ? JSON.parse(saved) : false;
+  });
 
   // Fetch workouts on component mount
   useEffect(() => {
@@ -77,6 +82,11 @@ function App() {
     // Also ensure we have today's date on mount
     setFormData(prev => ({ ...prev, date: getTodaysDate() }));
   }, []);
+
+  // Save useImperial preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('useImperial', JSON.stringify(useImperial));
+  }, [useImperial]);
 
   // Auto-calculate total turkish_get_ups when individual reps change
   useEffect(() => {
