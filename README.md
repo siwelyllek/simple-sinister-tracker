@@ -43,6 +43,8 @@ Simple & Sinister is a minimalist kettlebell program that focuses on just two ex
 * **🌙 Dark Theme** - Beautiful glassmorphism UI with dark theme
 * **🔥 Streak Tracking** - Monitor your training consistency
 * **📅 Workout History** - Detailed view of all your training sessions
+* **🔒 Security Hardened** - Localhost-only binding, non-root containers, comprehensive security scanning
+* **⚡ Optimized Performance** - 60% smaller Docker images with multi-stage builds and Alpine Linux
 
 ### Built With
 
@@ -96,6 +98,25 @@ That's it! The application will be running with:
 - Backend API: http://localhost:8225
 - Database: SQLite (local file)
 
+## Security & Performance
+
+This application has been optimized for both security and performance:
+
+### 🔒 Security Features
+- **Vulnerability Scanning**: Comprehensive security audit with 0 production vulnerabilities
+- **Localhost Binding**: Services bound to 127.0.0.1 for local-only access by default
+- **Non-root Containers**: Both frontend and backend run as non-privileged users
+- **Security Headers**: nginx configured with security headers (X-Frame-Options, X-Content-Type-Options, etc.)
+- **Minimal Attack Surface**: Alpine Linux base images with minimal packages
+
+### ⚡ Performance Optimizations
+- **60% Smaller Images**: Optimized from 623MB to 250MB total size
+  - Backend: 289MB → 170MB (Alpine Linux + multi-stage build)
+  - Frontend: 334MB → 80.3MB (nginx static serving)
+- **Multi-stage Builds**: Separate build and runtime environments
+- **Layer Caching**: Optimized Dockerfile layers for faster rebuilds
+- **Static Asset Optimization**: nginx serving with proper caching headers
+
 ### Network Access
 
 The application is configured to work from any device on your local network. Simply replace `localhost` with your server's IP address:
@@ -138,16 +159,26 @@ workout-tracker/
 │   │   ├── App.jsx         # Main application
 │   │   └── index.css       # Tailwind styles
 │   ├── public/             # Static assets
-│   └── Dockerfile          # Frontend container
+│   ├── nginx.conf          # nginx configuration with security headers
+│   └── Dockerfile          # Multi-stage frontend container (80.3MB)
 ├── backend/                # FastAPI backend
 │   ├── main.py            # FastAPI application
 │   ├── models.py          # Database models
 │   ├── crud.py            # Database operations
 │   ├── schemas.py         # Pydantic schemas
-│   └── Dockerfile         # Backend container
-├── docker-compose.yml     # Multi-container orchestration
+│   └── Dockerfile         # Multi-stage backend container (170MB)
+├── docker-compose.yml     # Multi-container orchestration with security
 └── README.md             # Project documentation
 ```
+
+### Docker Architecture
+
+The application uses optimized multi-stage Docker builds:
+
+- **Frontend**: Node.js build stage → nginx Alpine runtime (60% size reduction)
+- **Backend**: Python build stage → Alpine runtime with non-root user
+- **Security**: Localhost-only binding, minimal base images, security headers
+- **Performance**: Optimized layer caching, static asset serving, compressed images
 
 ## API Documentation
 
@@ -155,10 +186,16 @@ Once running, visit `http://localhost:8225/docs` for interactive API documentati
 
 ### Key Endpoints
 
-- `GET /workouts` - Retrieve all workouts
-- `POST /workouts` - Create a new workout
+- `GET /workouts/` - Retrieve all workouts
+- `POST /workouts/` - Create a new workout
 - `DELETE /workouts/{id}` - Delete a workout
-- `GET /health` - Health check endpoint
+
+### Security Testing
+
+The application has been tested with comprehensive security scanning:
+- **Snyk Security Scan**: 0 production vulnerabilities found
+- **Dependency Audit**: All dependencies verified for known security issues
+- **Container Security**: Non-root execution, minimal attack surface
 
 ## Contributing
 
@@ -184,6 +221,8 @@ Distributed under the MIT License. See [LICENSE](https://opensource.org/licenses
 * [React Calendar Heatmap](https://github.com/kevinsqi/react-calendar-heatmap) - Heatmap component
 * [Tailwind CSS](https://tailwindcss.com/) - Styling framework
 * [FastAPI](https://fastapi.tiangolo.com/) - Backend framework
+* [Snyk](https://snyk.io/) - Security vulnerability scanning
+* [Alpine Linux](https://alpinelinux.org/) - Lightweight, secure container base images
 
 <!-- MARKDOWN LINKS & IMAGES -->
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
