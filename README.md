@@ -18,16 +18,14 @@
     <a href="https://github.com/siwelyllek/simple-sinister-tracker/issues">Report Bug</a>
     ·
     <a href="https://github.com/siwelyllek/simple-sinister-tracker/issues">Request Feature</a>
+
+   ![Main App](images/Simple%20and%20Sinister%20App.png)
+   ![Chart](images/Simple%20and%20Sinister%20Chart.png)
+   ![History](images/Simple%20and%20Sinister%20History.png)
   </p>
 </div>
 
-<p align="center">
 
-![Main App](images/Simple%20and%20Sinister%20App.png)
-![Chart](images/Simple%20and%20Sinister%20Chart.png)
-![History](images/Simple%20and%20Sinister%20History.png)
-
-</p>
 ## About The Project
 
 
