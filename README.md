@@ -21,10 +21,13 @@
   </p>
 </div>
 
+<p align="center">
+
 ![Main App](images/Simple%20and%20Sinister%20App.png)
 ![Chart](images/Simple%20and%20Sinister%20Chart.png)
 ![History](images/Simple%20and%20Sinister%20History.png)
 
+</p>
 ## About The Project
 
 
