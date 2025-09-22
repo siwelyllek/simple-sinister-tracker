@@ -101,12 +101,6 @@ That's it! The application will be running with:
 
 This application has been optimized for both security and performance:
 
-### 🔒 Security Features
-- **Vulnerability Scanning**: Comprehensive security audit with 0 production vulnerabilities
-- **Localhost Binding**: Services bound to 127.0.0.1 for local-only access by default
-- **Non-root Containers**: Both frontend and backend run as non-privileged users
-- **Security Headers**: nginx configured with security headers (X-Frame-Options, X-Content-Type-Options, etc.)
-
 ### Network Access
 
 The application is configured to work from any device on your local network. Simply replace `localhost` with your server's IP address:
@@ -121,6 +115,7 @@ The application is configured to work from any device on your local network. Sim
    - Enter the number of swings (default: 100)
    - Select weight (kg or lbs)
    - Choose swing style (1-handed or 2-handed)
+   - Choose workout styoe (EMOM, Standard, etc)
 
 2. **Turkish Get-ups**
    - Enter reps for Weight 1
@@ -160,15 +155,6 @@ workout-tracker/
 ├── docker-compose.yml     # Multi-container orchestration with security
 └── README.md             # Project documentation
 ```
-
-### Docker Architecture
-
-The application uses optimized multi-stage Docker builds:
-
-- **Frontend**: Node.js build stage → nginx Alpine runtime
-- **Backend**: Python build stage → Alpine runtime with non-root user
-- **Security**: Localhost-only binding, minimal base images, security headers
-- **Performance**: Optimized layer caching, static asset serving, compressed images
 
 ## API Documentation
 
