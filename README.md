@@ -13,11 +13,6 @@
     <a href="#about-the-project"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://buymeacoffee.com/siwelyllek" target="_blank">
-      <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
-    </a>
-    <br />
-    <br />
     <a href="#getting-started">Quick Start</a>
     ·
     <a href="https://github.com/siwelyllek/simple-sinister-tracker/issues">Report Bug</a>
@@ -186,6 +181,13 @@ Once running, visit `http://localhost:8225/docs` for interactive API documentati
 
 
 ## Contributing
+
+<a href="https://buymeacoffee.com/siwelyllek" target="_blank" rel="noopener noreferrer">
+      <img src="https://img.shields.io/badge/Buy%20me%20a%20beer-🍺-%23BD5FFF?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white" alt="Buy me a beer" height="30">
+</a>
+<br />
+<br />
+
 
 Contributions make the open source community amazing! Any contributions you make are **greatly appreciated**.
 
