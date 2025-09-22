@@ -48,8 +48,6 @@ Simple & Sinister is a minimalist kettlebell program that focuses on just two ex
 * **🌙 Dark Theme** - Beautiful glassmorphism UI with dark theme
 * **🔥 Streak Tracking** - Monitor your training consistency
 * **📅 Workout History** - Detailed view of all your training sessions
-* **🔒 Security Hardened** - Localhost-only binding, non-root containers, comprehensive security scanning
-* **⚡ Optimized Performance** - 60% smaller Docker images with multi-stage builds and Alpine Linux
 
 ### Built With
 
@@ -112,20 +110,11 @@ This application has been optimized for both security and performance:
 - **Localhost Binding**: Services bound to 127.0.0.1 for local-only access by default
 - **Non-root Containers**: Both frontend and backend run as non-privileged users
 - **Security Headers**: nginx configured with security headers (X-Frame-Options, X-Content-Type-Options, etc.)
-- **Minimal Attack Surface**: Alpine Linux base images with minimal packages
-
-### ⚡ Performance Optimizations
-- **60% Smaller Images**: Optimized from 623MB to 250MB total size
-  - Backend: 289MB → 170MB (Alpine Linux + multi-stage build)
-  - Frontend: 334MB → 80.3MB (nginx static serving)
-- **Multi-stage Builds**: Separate build and runtime environments
-- **Layer Caching**: Optimized Dockerfile layers for faster rebuilds
-- **Static Asset Optimization**: nginx serving with proper caching headers
 
 ### Network Access
 
 The application is configured to work from any device on your local network. Simply replace `localhost` with your server's IP address:
-- From other devices: `http://YOUR_SERVER_IP:3122` (e.g., `http://192.168.1.175:3122`)
+- From other devices: `http://YOUR_SERVER_IP:3122` (e.g., `http://192.168.1.66:3122`)
 - API access: `http://YOUR_SERVER_IP:8225`
 
 ## Usage
@@ -180,7 +169,7 @@ workout-tracker/
 
 The application uses optimized multi-stage Docker builds:
 
-- **Frontend**: Node.js build stage → nginx Alpine runtime (60% size reduction)
+- **Frontend**: Node.js build stage → nginx Alpine runtime
 - **Backend**: Python build stage → Alpine runtime with non-root user
 - **Security**: Localhost-only binding, minimal base images, security headers
 - **Performance**: Optimized layer caching, static asset serving, compressed images
@@ -195,12 +184,6 @@ Once running, visit `http://localhost:8225/docs` for interactive API documentati
 - `POST /workouts/` - Create a new workout
 - `DELETE /workouts/{id}` - Delete a workout
 
-### Security Testing
-
-The application has been tested with comprehensive security scanning:
-- **Snyk Security Scan**: 0 production vulnerabilities found
-- **Dependency Audit**: All dependencies verified for known security issues
-- **Container Security**: Non-root execution, minimal attack surface
 
 ## Contributing
 
@@ -241,5 +224,5 @@ Distributed under the MIT License. See [LICENSE](https://opensource.org/licenses
 [TailwindCSS]: https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white
 [Tailwind-url]: https://tailwindcss.com/
 [SQLite]: https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white
-
 [SQLite-url]: https://www.sqlite.org/
+
