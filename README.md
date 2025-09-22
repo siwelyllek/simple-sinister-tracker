@@ -13,6 +13,11 @@
     <a href="#about-the-project"><strong>Explore the docs »</strong></a>
     <br />
     <br />
+    <a href="https://buymeacoffee.com/siwelyllek" target="_blank">
+      <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
+    </a>
+    <br />
+    <br />
     <a href="#getting-started">Quick Start</a>
     ·
     <a href="https://github.com/siwelyllek/simple-sinister-tracker/issues">Report Bug</a>
