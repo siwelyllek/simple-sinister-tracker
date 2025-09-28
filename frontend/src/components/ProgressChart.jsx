@@ -3,9 +3,7 @@ import React, { useState, useMemo } from "react";
 export default function ProgressChart({ workouts, useImperial, theme }) {
   const [selectedMetrics, setSelectedMetrics] = useState({
     swingWeight: true,
-    swingVolume: true,
-    getupWeight: true,
-    getupVolume: true
+    getupWeight: true
   });
 
   // Default theme fallback
@@ -26,25 +24,28 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
     const sortedWorkouts = [...workouts].sort((a, b) => new Date(a.date) - new Date(b.date));
 
     return sortedWorkouts.map((workout, index) => {
-      // Calculate volumes
-      const swingVolume = workout.kettlebell_swings * (workout.swing_weight_kg || 16);
-      const getupVolume = (workout.getup_reps_1 || 0) * (workout.getup_weight_1_kg || 16) + 
-                         (workout.getup_reps_2 || 0) * (workout.getup_weight_2_kg || 0);
+      // Calculate get-up weight (sum if combo weights used)
+      let getupWeightKg = workout.getup_weight_1_kg || 16;
+      if (workout.getup_weight_2_kg && workout.getup_reps_2 > 0) {
+        // If using combo weights, calculate weighted average or sum based on reps
+        const totalReps = (workout.getup_reps_1 || 0) + (workout.getup_reps_2 || 0);
+        if (totalReps > 0) {
+          const weight1Contribution = ((workout.getup_reps_1 || 0) / totalReps) * (workout.getup_weight_1_kg || 16);
+          const weight2Contribution = ((workout.getup_reps_2 || 0) / totalReps) * (workout.getup_weight_2_kg || 0);
+          getupWeightKg = weight1Contribution + weight2Contribution;
+        }
+      }
 
       // Convert to imperial if needed
       const swingWeight = useImperial ? Math.round((workout.swing_weight_kg || 16) * 2.20462) : (workout.swing_weight_kg || 16);
-      const getupWeight = useImperial ? Math.round((workout.getup_weight_1_kg || 16) * 2.20462) : (workout.getup_weight_1_kg || 16);
-      const swingVol = useImperial ? Math.round(swingVolume * 2.20462) : swingVolume;
-      const getupVol = useImperial ? Math.round(getupVolume * 2.20462) : getupVolume;
+      const getupWeight = useImperial ? Math.round(getupWeightKg * 2.20462) : Math.round(getupWeightKg);
 
       return {
         date: workout.date,
         workoutNumber: index + 1,
         formattedDate: new Date(workout.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         swingWeight,
-        swingVolume: swingVol,
-        getupWeight,
-        getupVolume: getupVol
+        getupWeight
       };
     });
   }, [workouts, useImperial]);
@@ -59,9 +60,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
   // Find min/max values for scaling
   const allValues = chartData.flatMap(d => [
     selectedMetrics.swingWeight ? d.swingWeight : null,
-    selectedMetrics.swingVolume ? d.swingVolume / 100 : null, // Scale volume down for visibility
-    selectedMetrics.getupWeight ? d.getupWeight : null,
-    selectedMetrics.getupVolume ? d.getupVolume / 10 : null // Scale volume down for visibility
+    selectedMetrics.getupWeight ? d.getupWeight : null
   ].filter(v => v !== null));
 
   const minValue = Math.min(...allValues) * 0.9;
@@ -88,25 +87,11 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
       visible: selectedMetrics.swingWeight
     },
     {
-      id: 'swingVolume',
-      name: 'Swing Volume ÷100',
-      color: '#06B6D4', // Cyan
-      path: selectedMetrics.swingVolume ? generatePath(chartData, d => d.swingVolume / 100) : "",
-      visible: selectedMetrics.swingVolume
-    },
-    {
       id: 'getupWeight',
       name: 'Get-up Weight',
       color: '#8B5CF6', // Purple
       path: selectedMetrics.getupWeight ? generatePath(chartData, d => d.getupWeight) : "",
       visible: selectedMetrics.getupWeight
-    },
-    {
-      id: 'getupVolume',
-      name: 'Get-up Volume ÷10',
-      color: '#EC4899', // Pink
-      path: selectedMetrics.getupVolume ? generatePath(chartData, d => d.getupVolume / 10) : "",
-      visible: selectedMetrics.getupVolume
     }
   ];
 
@@ -137,10 +122,10 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
       <div className={`bg-gradient-to-r from-${currentTheme.accent}-500/80 to-${currentTheme.button}/80 px-6 py-4`}>
         <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
           <span>📈</span>
-          Progress Chart
+          Weight Progress Chart
         </h2>
         <p className={`text-${currentTheme.text} text-sm mt-1`}>
-          Track your weight and volume progression over time
+          Track your weight progression over time
         </p>
       </div>
 
@@ -215,10 +200,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
                     <circle
                       key={i}
                       cx={xScale(i)}
-                      cy={yScale(line.id === 'swingWeight' ? d.swingWeight :
-                                 line.id === 'swingVolume' ? d.swingVolume / 100 :
-                                 line.id === 'getupWeight' ? d.getupWeight :
-                                 d.getupVolume / 10)}
+                      cy={yScale(line.id === 'swingWeight' ? d.swingWeight : d.getupWeight)}
                       r="4"
                       fill={line.color}
                       className="drop-shadow-sm hover:r-6 transition-all cursor-pointer"
@@ -226,9 +208,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
                       <title>
                         {d.formattedDate}: {
                           line.id === 'swingWeight' ? `${d.swingWeight}${useImperial ? 'lbs' : 'kg'}` :
-                          line.id === 'swingVolume' ? `${d.swingVolume.toLocaleString()}${useImperial ? 'lbs' : 'kg'} volume` :
-                          line.id === 'getupWeight' ? `${d.getupWeight}${useImperial ? 'lbs' : 'kg'}` :
-                          `${d.getupVolume.toLocaleString()}${useImperial ? 'lbs' : 'kg'} volume`
+                          `${d.getupWeight}${useImperial ? 'lbs' : 'kg'}`
                         }
                       </title>
                     </circle>
@@ -280,7 +260,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
               fontSize="16"
               fontWeight="bold"
             >
-              Weight & Volume Progression
+              Weight Progression
             </text>
           </svg>
         </div>
@@ -288,7 +268,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
         {/* Chart info */}
         <div className="mt-4 text-center">
           <p className={`text-${currentTheme.text} text-sm`}>
-            Volume metrics are scaled down for better visualization (÷10 for get-ups, ÷100 for swings)
+            Get-up weights shown as weighted average when using multiple weights
           </p>
         </div>
       </div>
