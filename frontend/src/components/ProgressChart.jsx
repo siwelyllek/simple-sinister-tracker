@@ -105,9 +105,9 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
   if (!workouts || workouts.length === 0) {
     return (
       <div className={`bg-${currentTheme.glass} backdrop-blur-lg rounded-2xl border border-${currentTheme.border} p-8`}>
-        <div className="text-center">
-          <div className="text-4xl mb-4">📈</div>
-          <h3 className="text-lg font-semibold text-white mb-2">Progress Chart</h3>
+        <div className="text-center flex flex-col items-center justify-center">
+          <div className="text-6xl mb-4">📈</div>
+          <h3 className="text-lg font-semibold text-white mb-2">Weight Progress Chart</h3>
           <p className={`text-${currentTheme.text}`}>
             Start logging workouts to see your progress over time!
           </p>
@@ -131,7 +131,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
 
       <div className="p-6">
         {/* Legend and Controls */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap justify-center gap-3 mb-6">
           {lines.map(line => (
             <button
               key={line.id}
@@ -152,7 +152,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
         </div>
 
         {/* Chart */}
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto flex justify-center">
           <svg width={chartWidth} height={chartHeight} className="bg-white/5 rounded-lg">
             {/* Grid lines */}
             <defs>
@@ -266,8 +266,8 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
         </div>
 
         {/* Chart info */}
-        <div className="mt-4 text-center">
-          <p className={`text-${currentTheme.text} text-sm`}>
+        <div className="mt-4 text-center flex justify-center">
+          <p className={`text-${currentTheme.text} text-sm max-w-md`}>
             Get-up weights shown as weighted average when using multiple weights
           </p>
         </div>
