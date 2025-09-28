@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import axios from "axios"
 
 // Dynamic API URL function that works from any device
@@ -20,8 +20,32 @@ const getApiUrl = () => {
   return apiUrl;
 };
 
-export default function WorkoutList({ workouts, refresh, isLoading, useImperial = false }) {
+export default function WorkoutList({ workouts, refresh, isLoading, useImperial = false, theme }) {
   const [deletingId, setDeletingId] = useState(null)
+  const [currentPage, setCurrentPage] = useState(0)
+  
+  // Initialize history visibility from localStorage or default to true
+  const [isHistoryVisible, setIsHistoryVisible] = useState(() => {
+    const saved = localStorage.getItem('workoutHistoryVisible');
+    return saved !== null ? JSON.parse(saved) : true;
+  })
+  
+  const workoutsPerPage = 5
+  
+  // Default theme fallback
+  const defaultTheme = {
+    accent: 'purple',
+    glass: 'white/10',
+    border: 'white/20',
+    text: 'purple-200',
+    button: 'purple-600'
+  }
+  const currentTheme = theme || defaultTheme
+
+  // Save history visibility preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('workoutHistoryVisible', JSON.stringify(isHistoryVisible));
+  }, [isHistoryVisible]);
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this workout?")) return
@@ -47,6 +71,20 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
     })
   }
 
+  // Pagination logic
+  const totalPages = Math.ceil(workouts.length / workoutsPerPage)
+  const startIndex = currentPage * workoutsPerPage
+  const endIndex = startIndex + workoutsPerPage
+  const currentWorkouts = workouts.slice(startIndex, endIndex)
+  
+  const goToNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages - 1))
+  }
+  
+  const goToPrevPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 0))
+  }
+  
   const formatWeight = (kg) => {
     if (useImperial) {
       return `${Math.round(kg * 2.20462)}lbs`
@@ -125,19 +163,39 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
   }
 
   return (
-    <div className="bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 overflow-hidden">
-      <div className="bg-gradient-to-r from-indigo-500/80 to-purple-600/80 px-6 py-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-          <span>📝</span>
-          Workout History
-        </h2>
-        <p className="text-indigo-100 text-sm mt-1">
-          {workouts.length > 0 ? `${workouts.length} workouts logged` : "Your workout journey starts here"}
-        </p>
+    <div className={`bg-${currentTheme.glass} backdrop-blur-lg rounded-2xl border border-${currentTheme.border} overflow-hidden`}>
+      <div className={`bg-gradient-to-r from-${currentTheme.accent}-500/80 to-${currentTheme.button}/80 px-6 py-4`}>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+              <span>📝</span>
+              Workout History
+            </h2>
+            <p className={`text-${currentTheme.text} text-sm mt-1`}>
+              {workouts.length > 0 ? `${workouts.length} workouts logged` : "Your workout journey starts here"}
+            </p>
+          </div>
+          <button
+            onClick={() => setIsHistoryVisible(!isHistoryVisible)}
+            className={`flex items-center gap-2 px-4 py-2 bg-white/20 rounded-lg text-white hover:bg-white/30 transition-colors`}
+          >
+            <span>{isHistoryVisible ? '👁️' : '👁️‍🗨️'}</span>
+            <span>{isHistoryVisible ? 'Hide' : 'Show'}</span>
+            <svg 
+              className={`w-4 h-4 transition-transform ${isHistoryVisible ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div className="p-6">
-        {workouts.length === 0 ? (
+      {isHistoryVisible && (
+        <div className="p-6">
+          {workouts.length === 0 ? (
           <div className="text-center py-8">
             <div className="text-6xl mb-4">📋</div>
             <h3 className="text-lg font-semibold text-slate-700 mb-2">
@@ -149,9 +207,45 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
           </div>
         ) : (
           <>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mb-6 px-4 py-3 bg-white/5 rounded-xl">
+                <button
+                  onClick={goToPrevPage}
+                  disabled={currentPage === 0}
+                  className={`flex items-center gap-2 px-4 py-2 bg-${currentTheme.button}/20 rounded-lg text-white hover:bg-${currentTheme.button}/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span>Previous</span>
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-white text-sm">
+                    Page {currentPage + 1} of {totalPages}
+                  </span>
+                  <span className={`text-${currentTheme.text} text-xs`}>
+                    ({startIndex + 1}-{Math.min(endIndex, workouts.length)} of {workouts.length})
+                  </span>
+                </div>
+                
+                <button
+                  onClick={goToNextPage}
+                  disabled={currentPage === totalPages - 1}
+                  className={`flex items-center gap-2 px-4 py-2 bg-${currentTheme.button}/20 rounded-lg text-white hover:bg-${currentTheme.button}/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <span>Next</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
+            
             {/* Enhanced Card View */}
             <div className="space-y-4">
-              {workouts.map((workout) => {
+              {currentWorkouts.map((workout) => {
                 const rating = getWorkoutRating(workout.kettlebell_swings, workout.turkish_get_ups)
                 const volume = calculateVolume(workout)
                 const getUpDisplay = getGetUpDisplay(workout)
@@ -303,7 +397,8 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
             </div>
           </>
         )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
