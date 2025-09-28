@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Heatmap from './components/Heatmap';
+import ProgressChart from './components/ProgressChart';
 import WorkoutList from './components/WorkoutList';
 import CustomSelect from './components/CustomSelect';
 
@@ -519,8 +520,12 @@ function App() {
           </div>
         </div>
 
-        {/* Training Consistency Heatmap */}
-        <div className="max-w-4xl mx-auto mb-12">
+        {/* Training Consistency Section */}
+        <div className="max-w-6xl mx-auto mb-12 space-y-8">
+          {/* Progress Chart */}
+          <ProgressChart workouts={workouts} useImperial={useImperial} theme={theme} />
+          
+          {/* Training Consistency Heatmap */}
           <Heatmap workouts={workouts} isLoading={isLoading} useImperial={useImperial} theme={theme} />
         </div>
 
