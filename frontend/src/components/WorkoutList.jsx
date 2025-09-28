@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import axios from "axios"
 
 // Dynamic API URL function that works from any device
@@ -23,7 +23,13 @@ const getApiUrl = () => {
 export default function WorkoutList({ workouts, refresh, isLoading, useImperial = false, theme }) {
   const [deletingId, setDeletingId] = useState(null)
   const [currentPage, setCurrentPage] = useState(0)
-  const [isHistoryVisible, setIsHistoryVisible] = useState(true)
+  
+  // Initialize history visibility from localStorage or default to true
+  const [isHistoryVisible, setIsHistoryVisible] = useState(() => {
+    const saved = localStorage.getItem('workoutHistoryVisible');
+    return saved !== null ? JSON.parse(saved) : true;
+  })
+  
   const workoutsPerPage = 5
   
   // Default theme fallback
@@ -35,6 +41,11 @@ export default function WorkoutList({ workouts, refresh, isLoading, useImperial 
     button: 'purple-600'
   }
   const currentTheme = theme || defaultTheme
+
+  // Save history visibility preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('workoutHistoryVisible', JSON.stringify(isHistoryVisible));
+  }, [isHistoryVisible]);
 
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this workout?")) return
