@@ -260,7 +260,7 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
               </div>
             </div>
 
-            <div ref={scrollRef} onScroll={updateScrollProgress} className="overflow-x-auto scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
+            <div ref={scrollRef} onScroll={updateScrollProgress} className="overflow-x-auto hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
               <div className="min-w-[600px]">
                 <CalendarHeatmap
                   startDate={new Date(`${currentYear}-01-01`)}

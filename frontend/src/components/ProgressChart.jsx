@@ -180,7 +180,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
         </div>
 
         {/* Chart */}
-        <div ref={scrollRef} onScroll={updateScrollProgress} className="w-full overflow-x-auto flex justify-center scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div ref={scrollRef} onScroll={updateScrollProgress} className="w-full overflow-x-auto flex justify-center hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
           <svg width={chartWidth} height={chartHeight} className="rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
             {/* Grid lines */}
             <defs>

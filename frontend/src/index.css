@@ -99,6 +99,14 @@
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
     background: theme('colors.slate.500');
   }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Loading animations */
