@@ -83,8 +83,16 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
     selectedMetrics.getupWeight ? d.getupWeight : null
   ].filter(v => v !== null));
 
-  const minValue = Math.min(...allValues) * 0.9;
-  const maxValue = Math.max(...allValues) * 1.1;
+  const safeValues = allValues.length > 0 ? allValues : [0, 1];
+  let minValue = Math.min(...safeValues) * 0.9;
+  let maxValue = Math.max(...safeValues) * 1.1;
+  if (!Number.isFinite(minValue) || !Number.isFinite(maxValue)) {
+    minValue = 0;
+    maxValue = 1;
+  }
+  if (maxValue === minValue) {
+    maxValue = minValue + 1;
+  }
 
   // Create scale functions
   const xScale = (index) => (index / Math.max(chartData.length - 1, 1)) * innerWidth;
@@ -173,7 +181,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
 
         {/* Chart */}
         <div ref={scrollRef} onScroll={updateScrollProgress} className="w-full overflow-x-auto flex justify-center scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <svg width={chartWidth} height={chartHeight} className="bg-white/5 rounded-lg">
+          <svg width={chartWidth} height={chartHeight} className="rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
             {/* Grid lines */}
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
