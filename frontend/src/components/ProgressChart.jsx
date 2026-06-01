@@ -20,12 +20,6 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
     setThumbWidth(widthPercent);
   };
 
-  useEffect(() => {
-    updateScrollProgress();
-    window.addEventListener("resize", updateScrollProgress);
-    return () => window.removeEventListener("resize", updateScrollProgress);
-  }, [chartData]);
-
   // Default theme fallback
   const defaultTheme = {
     accent: 'purple',
@@ -69,6 +63,12 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
       };
     });
   }, [workouts, useImperial]);
+
+  useEffect(() => {
+    updateScrollProgress();
+    window.addEventListener("resize", updateScrollProgress);
+    return () => window.removeEventListener("resize", updateScrollProgress);
+  }, [chartData]);
 
   // Calculate chart dimensions and scales
   const chartWidth = 800;
