@@ -1,10 +1,30 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 
 export default function ProgressChart({ workouts, useImperial, theme }) {
   const [selectedMetrics, setSelectedMetrics] = useState({
     swingWeight: true,
     getupWeight: true
   });
+  const scrollRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(100);
+
+  const updateScrollProgress = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const maxScroll = scrollWidth - clientWidth;
+    const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+    const widthPercent = scrollWidth > 0 ? Math.min(100, (clientWidth / scrollWidth) * 100) : 100;
+    setScrollProgress(progress);
+    setThumbWidth(widthPercent);
+  };
+
+  useEffect(() => {
+    updateScrollProgress();
+    window.addEventListener("resize", updateScrollProgress);
+    return () => window.removeEventListener("resize", updateScrollProgress);
+  }, [chartData]);
 
   // Default theme fallback
   const defaultTheme = {
@@ -152,7 +172,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
         </div>
 
         {/* Chart */}
-        <div className="w-full overflow-x-auto flex justify-center">
+        <div ref={scrollRef} onScroll={updateScrollProgress} className="w-full overflow-x-auto flex justify-center scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
           <svg width={chartWidth} height={chartHeight} className="bg-white/5 rounded-lg">
             {/* Grid lines */}
             <defs>
@@ -264,6 +284,23 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
             </text>
           </svg>
         </div>
+
+        {thumbWidth < 100 && (
+          <div className="mt-4 px-2 sm:px-0">
+            <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-blue-400 transition-transform duration-150 ease-out"
+                style={{
+                  width: `${thumbWidth}%`,
+                  transform: `translateX(${scrollProgress * (100 - thumbWidth)}%)`
+                }}
+              />
+            </div>
+            <p className="text-xs text-white/60 mt-2 text-center">
+              Swipe to see more of your progress chart
+            </p>
+          </div>
+        )}
 
         {/* Chart info */}
         <div className="mt-4 text-center flex justify-center">
