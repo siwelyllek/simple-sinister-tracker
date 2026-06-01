@@ -180,8 +180,9 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
         </div>
 
         {/* Chart */}
-        <div ref={scrollRef} onScroll={updateScrollProgress} className="w-full overflow-x-auto flex justify-center hide-scrollbar" style={{ WebkitOverflowScrolling: 'touch' }}>
-          <svg width={chartWidth} height={chartHeight} className="rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
+        <div ref={scrollRef} onScroll={updateScrollProgress} className="overflow-x-auto hide-scrollbar flex justify-center" style={{ WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ minWidth: `${chartWidth}px` }}>
+            <svg width={chartWidth} height={chartHeight} className="rounded-lg" style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}>
             {/* Grid lines */}
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -290,8 +291,7 @@ export default function ProgressChart({ workouts, useImperial, theme }) {
             >
               Weight Progression
             </text>
-          </svg>
-        </div>
+          </svg>          </div>        </div>
 
         {thumbWidth < 100 && (
           <div className="mt-4 px-2 sm:px-0">
