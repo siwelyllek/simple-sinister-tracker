@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
 import { Tooltip } from "react-tooltip";
@@ -6,6 +6,26 @@ import { Tooltip } from "react-tooltip";
 export default function Heatmap({ workouts, isLoading, useImperial }) {
   const [values, setValues] = useState([]);
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
+  const scrollRef = useRef(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [thumbWidth, setThumbWidth] = useState(100);
+
+  const updateScrollProgress = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    const maxScroll = scrollWidth - clientWidth;
+    const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+    const widthPercent = scrollWidth > 0 ? Math.min(100, (clientWidth / scrollWidth) * 100) : 100;
+    setScrollProgress(progress);
+    setThumbWidth(widthPercent);
+  };
+
+  useEffect(() => {
+    updateScrollProgress();
+    window.addEventListener("resize", updateScrollProgress);
+    return () => window.removeEventListener("resize", updateScrollProgress);
+  }, [values]);
 
   const formatVolume = (volumeKg) => {
     if (useImperial) {
@@ -240,7 +260,7 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div ref={scrollRef} onScroll={updateScrollProgress} className="overflow-x-auto scrollbar-thin" style={{ WebkitOverflowScrolling: 'touch' }}>
               <div className="min-w-[600px]">
                 <CalendarHeatmap
                   startDate={new Date(`${currentYear}-01-01`)}
@@ -257,6 +277,23 @@ export default function Heatmap({ workouts, isLoading, useImperial }) {
                 />
               </div>
             </div>
+
+            {thumbWidth < 100 && (
+              <div className="mt-4 px-2 sm:px-0">
+                <div className="h-1 rounded-full bg-white/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-green-300 transition-transform duration-150 ease-out"
+                    style={{
+                      width: `${thumbWidth}%`,
+                      transform: `translateX(${scrollProgress * (100 - thumbWidth)}%)`
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-white/60 mt-2 text-center">
+                  Swipe to see more of your consistency heatmap
+                </p>
+              </div>
+            )}
 
             <Tooltip
               id="heatmap-tooltip"
